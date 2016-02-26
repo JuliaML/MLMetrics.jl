@@ -53,11 +53,15 @@ API
 
 ### Regression metrics
 
-#### Load library and data
+#### Load package
 
 ``` julia
 using Metrics
+```
 
+#### Use metrics to score results from models
+
+``` julia
 mean_squared_error([1.0, 2.0], [1.0, 1.0])
 ```
 
