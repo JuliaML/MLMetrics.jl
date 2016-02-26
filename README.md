@@ -7,7 +7,7 @@ Metrics.jl
 
 -   Regression metrics (implemented in 0.1.0)
 
-The following types of metrics are soon to be implemented in `scorer`:
+The following types of metrics are soon to be implemented in `Metrics.jl`:
 
 -   Classification metrics (to be implemented in 0.1.0)
 -   Multilabel ranking metrics (to be implemented in 0.1.0)
@@ -26,4 +26,4 @@ You can install:
 Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
 ```
 
-If you encounter a clear bug, please file a minimal reproducible example on [Github](https://github.com/paulhendricks/scorer/issues).
+If you encounter a clear bug, please file a minimal reproducible example on [Github](https://github.com/paulhendricks/Metrics.jl/issues).
