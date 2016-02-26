@@ -31,7 +31,7 @@ If you encounter a clear bug, please file a minimal reproducible example on [Git
 News
 ----
 
-### Metrics.jl 0.1.0
+### Metrics 0.1.0
 
 #### Improvements
 
@@ -53,9 +53,9 @@ mean_squared_error([1.0, 2.0], [1.0, 1.0])
 People
 ------
 
--   The original author of `scorer` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
+-   The original author of `Metrics.jl` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
 
--   The lead maintainer of `scorer` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
+-   The lead maintainer of `Metrics.jl` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
 
 License
 -------
