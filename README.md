@@ -60,4 +60,4 @@ People
 License
 -------
 
-[![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/paulhendricks/scorer/blob/master/LICENSE)
+[![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/paulhendricks/Metrics.jl/blob/master/LICENSE.md)
