@@ -89,7 +89,7 @@ function explained_variance_score(y_true::Array, y_pred::Array)
     return(sum((y_pred - mean(y_true)) .^ 2))
 end
 
-function explained_variance_score(y_true::Array, y_pred::Array)
+function unexplained_variance_score(y_true::Array, y_pred::Array)
     return(sum((y_true - y_pred) .^ 2))
 end
 
