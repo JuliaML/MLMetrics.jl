@@ -67,29 +67,32 @@ function median_absolute_percent_error(y_true::Array, y_pred::Array)
 end
 
 function symmetric_mean_absolute_percent_error(y_true::Array, y_pred::Array)
-    return(true)
+    return(mean(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
 end
 
 function symmetric_median_absolute_percent_error(y_true::Array, y_pred::Array)
-    return(true)
+    return(median(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
 end
 
 function mean_absolute_scaled_error(y_true::Array, y_pred::Array)
-    return(true)
+    n <- max(length(y_true), length(y_pred))
+    numerator <- sum(abs(y_true - y_pred))
+    denominator <- (n / (n - 1)) * sum(abs(y_true[2:n] - y_pred[1:(n-1)]))
+    return(numerator / denominator)
 end
 
 function total_variance_score(y_true::Array, y_pred::Array)
-    return(true)
+    return(sum((y_true - mean(y_true)) .^ 2))
 end
 
 function explained_variance_score(y_true::Array, y_pred::Array)
-    return(true)
+    return(sum((y_pred - mean(y_true)) .^ 2))
 end
 
 function explained_variance_score(y_true::Array, y_pred::Array)
-    return(true)
+    return(sum((y_true - y_pred) .^ 2))
 end
 
 function r2_score(y_true::Array, y_pred::Array)
-    return(true)
+    return(explained_variance_score(y_true, y_pred) / total_variance_score(y_true, y_pred))
 end
