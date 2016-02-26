@@ -27,3 +27,37 @@ Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
 ```
 
 If you encounter a clear bug, please file a minimal reproducible example on [Github](https://github.com/paulhendricks/Metrics.jl/issues).
+
+News
+----
+
+### Metrics.jl 0.1.0
+
+#### Improvements
+
+-   Implemented several functions for estimating errors.
+
+API
+---
+
+### Regression metrics
+
+#### Load library and data
+
+``` julia
+using Metrics
+
+mean_squared_error([1.0, 2.0], [1.0, 1.0])
+```
+
+People
+------
+
+-   The original author of `scorer` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
+
+-   The lead maintainer of `scorer` is [@Paul Hendricks](<https://github.com/paulhendricks>). [![Gratipay](https://img.shields.io/gratipay/JSFiddle.svg)](https://gratipay.com/~paulhendricks/)
+
+License
+-------
+
+[![License](http://img.shields.io/:license-MIT-blue.svg)](https://github.com/paulhendricks/scorer/blob/master/LICENSE)
