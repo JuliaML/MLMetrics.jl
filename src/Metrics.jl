@@ -27,8 +27,8 @@ export @~,
 ##############################################################################
 
 for filename in [
-        ("regression_metrics.jl"),
-        ("classification_metrics.jl")
+        "regression_metrics.jl",
+        "classification_metrics.jl"
     ]
 
     include(filename)
