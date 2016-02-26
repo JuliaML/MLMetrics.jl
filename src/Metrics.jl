@@ -1,5 +1,3 @@
 module Metrics
-
-# package code goes here
-
-end # module
+    include("regression_metrics.jl")
+end

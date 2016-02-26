@@ -5,3 +5,7 @@ end
 function sum_squared_error(y_true::Array, y_pred::Array)
     return(sum(squared_error(y_true, y_pred)))
 end
+
+function mean_squared_error(y_true::Array, y_pred::Array)
+    return(mean(squared_error(y_true, y_pred)))
+end
