@@ -35,7 +35,7 @@ News
 
 #### Improvements
 
--   Implemented several functions for estimating regression errors.
+-   Implemented several functions for scoring regression models.
 
 API
 ---
