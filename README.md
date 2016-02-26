@@ -20,7 +20,7 @@ Installation
 
 You can install:
 
--   the latest released version from Github with
+-   the latest development version from Github with
 
 ``` julia
 Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
