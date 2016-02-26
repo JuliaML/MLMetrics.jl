@@ -25,5 +25,12 @@ export @~,
 ##
 ##############################################################################
 
-include("regression_metrics.jl")
+for filename in [
+        ("regression_metrics.jl"),
+        ("classification_metrics.jl")
+    ]
+
+    include(filename)
 end
+
+end # module Metrics
