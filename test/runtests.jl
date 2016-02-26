@@ -5,8 +5,8 @@
 using Base.Test
 using Metrics
 
-my_tests = ["regression_metrics.jl",
-            "classification_metrics.jl"]
+my_tests = ["regression.jl",
+            "classification.jl"]
 
 println("Running tests:")
 
