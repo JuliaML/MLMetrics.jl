@@ -34,7 +34,7 @@ You can install:
 -   the latest development version from Github with
 
     ``` julia
-    Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
+    Pkg.checkout("Metrics")
     ```
 
 If you encounter a clear bug, please file a minimal reproducible example on [Github](https://github.com/paulhendricks/Metrics.jl/issues).
