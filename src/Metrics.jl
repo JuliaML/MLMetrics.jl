@@ -17,7 +17,8 @@ module Metrics
 export @~,
     squared_error,
     sum_squared_error,
-    mean_squared_error
+    mean_squared_error,
+    area_under_curve
 
 ##############################################################################
 ##
