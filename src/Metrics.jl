@@ -46,15 +46,16 @@ export @~,
 ##
 ##############################################################################
 
-for filename in [
+filenames = [
     "biclustering.jl",
     "classification.jl",
     "clustering.jl",
     "multilabel_ranking.jl",
     "pairwise.jl",
     "regression.jl"
-    ]
+  ]
 
+for filename in filenames
     include(filename)
 end
 

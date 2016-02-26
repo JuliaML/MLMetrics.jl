@@ -12,7 +12,7 @@ my_tests = [
     "multilabel_ranking.jl",
     "pairwise.jl",
     "regression.jl"
-    ]
+  ]
 
 println("Running tests:")
 
