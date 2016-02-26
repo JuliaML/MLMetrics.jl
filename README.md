@@ -20,11 +20,17 @@ Installation
 
 You can install:
 
+-   the latest stable release version with
+
+    ``` julia
+    Pkg.add("Metrics")
+    ```
+
 -   the latest development version from Github with
 
-``` julia
-Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
-```
+    ``` julia
+    Pkg.clone("git://github.com/paulhendricks/Metrics.jl.git")
+    ```
 
 If you encounter a clear bug, please file a minimal reproducible example on [Github](https://github.com/paulhendricks/Metrics.jl/issues).
 
