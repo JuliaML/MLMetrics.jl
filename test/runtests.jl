@@ -13,8 +13,8 @@ println("Running tests:")
 for my_test in my_tests
     try
         include(my_test)
-        println("\t\033[1m\033[32mPASSED\033[0m: $(my_test)")
+        println("\tPASSED: $(my_test)")
     catch e
-        println("\t\033[1m\033[31mFAILED\033[0m: $(my_test)")
+        println("\tFAILED: $(my_test)")
     end
 end
