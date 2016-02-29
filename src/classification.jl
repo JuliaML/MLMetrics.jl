@@ -1,9 +1,13 @@
 function auc_score(y_true::Array, y_pred::Array)
-    return(true)
+    r <- rank(y_pred)
+    n_pos <- sum(y_true == 1)
+    n_neg <- length(y_true) - n_pos
+    auc <- (sum(r[y_true == 1]) - n_pos * (n_pos + 1) /2) / (n_pos * n_neg)
+    return(auc)
 end
 
 function accuracy_score(y_true::Array, y_pred::Array)
-    return(true)
+    return((y_true == y_pred) / length(y_true))
 end
 
 function average_precision_score(y_true::Array, y_pred::Array)
