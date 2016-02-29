@@ -74,11 +74,7 @@ function roc_auc_score(y_true::Array, y_pred::Array)
     return(true)
 end
 
-function auc_curve(y_true::Array, y_pred::Array)
-    return(true)
-end
-
-function (y_true::Array, y_pred::Array)
+function roc_curve(y_true::Array, y_pred::Array)
     return(true)
 end
 
