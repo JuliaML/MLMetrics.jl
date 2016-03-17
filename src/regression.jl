@@ -1,4 +1,10 @@
+ function check_args(y_true::Array, y_pred::Array)
+    @assert length(y_true) == length(y_pred)
+    return(true)
+end
+
 function absolute_error(y_true::Array, y_pred::Array)
+    check_args(y_true, y_pred)
     return(abs(y_true - y_pred))
 end
 
@@ -75,9 +81,9 @@ function symmetric_median_absolute_percent_error(y_true::Array, y_pred::Array)
 end
 
 function mean_absolute_scaled_error(y_true::Array, y_pred::Array)
-    n <- max(length(y_true), length(y_pred))
-    numerator <- sum(abs(y_true - y_pred))
-    denominator <- (n / (n - 1)) * sum(abs(y_true[2:n] - y_pred[1:(n-1)]))
+    n = max(length(y_true), length(y_pred))
+    numerator = sum(abs(y_true - y_pred))
+    denominator = (n / (n - 1)) * sum(abs(y_true[2:n] - y_pred[1:(n-1)]))
     return(numerator / denominator)
 end
 
