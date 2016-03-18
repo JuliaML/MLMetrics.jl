@@ -12,14 +12,14 @@ Metrics.jl
 `Metrics` is a set of tools for quickly scoring models in data science and machine learning. This toolset is written in Julia for blazing fast performance. This toolset's API follows that of Python's [sklearn.metrics](http://scikit-learn.org/stable/modules/classes.html#sklearn-metrics-metrics) as closely as possible so one can easily switch back and forth between Julia and Python without too much cognitive dissonance. The following types of metrics are currently implemented in `Metrics`:
 
 -   Regression metrics (implemented in 0.1.0)
+-   Classification metrics (implemented in 0.1.0)
 
 The following types of metrics are soon to be implemented in `Metrics`:
 
--   Classification metrics (to be implemented in 0.1.0)
--   Multilabel ranking metrics (to be implemented in 0.1.0)
--   Clustering metrics (to be implemented in 0.1.0)
--   Biclustering metrics (to be implemented in 0.1.0)
--   Pairwise metrics (to be implemented in 0.1.0)
+-   Multilabel ranking metrics (to be implemented in 0.2.0)
+-   Clustering metrics (to be implemented in 0.2.0)
+-   Biclustering metrics (to be implemented in 0.2.0)
+-   Pairwise metrics (to be implemented in 0.2.0)
 
 Installation
 ------------
