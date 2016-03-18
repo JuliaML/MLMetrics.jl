@@ -48,6 +48,7 @@ News
 #### Improvements
 
 -   Implemented functions for scoring regression models.
+-   Implemented functions for scoring classification models.
 
 API
 ---
