@@ -4,6 +4,7 @@ Metrics.jl
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/0.1.0/active.svg)](http://www.repostatus.org/#active)
 [![Metrics](http://pkg.julialang.org/badges/Metrics_0.3.svg)](http://pkg.julialang.org/?pkg=Metrics&ver=0.3)
 [![Metrics](http://pkg.julialang.org/badges/Metrics_0.4.svg)](http://pkg.julialang.org/?pkg=Metrics&ver=0.4)
+[![Metrics](http://pkg.julialang.org/badges/Metrics_0.4.svg)](http://pkg.julialang.org/?pkg=Metrics&ver=0.5)
 [![Coverage Status](https://coveralls.io/repos/paulhendricks/Metrics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/paulhendricks/Metrics.jl?branch=master)
 [![Build Status](https://travis-ci.org/paulhendricks/Metrics.jl.svg?branch=master)](https://travis-ci.org/paulhendricks/Metrics.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/56u32eosqom801ht?svg=true)](https://ci.appveyor.com/project/paulhendricks/metrics-jl)
