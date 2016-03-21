@@ -1,6 +1,3 @@
-y_true = [1, 1, 0, 0]
-y_pred = [1, 0, 1, 0]
-
 function total_population(y_true::Array, y_pred::Array)
   return(length(y_true))
 end

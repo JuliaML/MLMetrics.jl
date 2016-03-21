@@ -6,11 +6,7 @@ using Base.Test
 using Metrics
 
 my_tests = [
-    "biclustering.jl",
     "classification.jl",
-    "clustering.jl",
-    "multilabel_ranking.jl",
-    "pairwise.jl",
     "regression.jl"
   ]
 

@@ -47,11 +47,7 @@ export @~,
 ##############################################################################
 
 filenames = [
-    "biclustering.jl",
     "classification.jl",
-    "clustering.jl",
-    "multilabel_ranking.jl",
-    "pairwise.jl",
     "regression.jl"
   ]
 
