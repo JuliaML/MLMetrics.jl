@@ -30,7 +30,7 @@ function predicted_condition_positive(y_true::Array, y_pred::Array)
   return(sum(y_true .== 1))
 end
 
-function predicted_negative(y_true::Array, y_pred::Array)
+function predicted_condition_negative(y_true::Array, y_pred::Array)
   return(sum(y_pred .== 0))
 end
 
