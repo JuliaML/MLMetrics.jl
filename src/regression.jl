@@ -1,104 +1,104 @@
- function check_args(y_true::Array, y_pred::Array)
+function check_args(y_true::Vector, y_pred::Vector)
     @assert length(y_true) == length(y_pred)
     return(true)
 end
 
-function absolute_error(y_true::Array, y_pred::Array)
+function absolute_error(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
     return(abs(y_true - y_pred))
 end
 
-function percent_error(y_true::Array, y_pred::Array)
+function percent_error(y_true::Vector, y_pred::Vector)
     return((y_true - y_pred) / y_true)
 end
 
-function log_error(y_true::Array, y_pred::Array)
+function log_error(y_true::Vector, y_pred::Vector)
     return(log(y_true - y_pred))
 end
 
-function squared_error(y_true::Array, y_pred::Array)
+function squared_error(y_true::Vector, y_pred::Vector)
     return((y_true - y_pred) .^ 2)
 end
 
-function squared_log_error(y_true::Array, y_pred::Array)
+function squared_log_error(y_true::Vector, y_pred::Vector)
     return(log_error(y_true, y_pred) .^ 2)
 end
 
-function absolute_percent_error(y_true::Array, y_pred::Array)
+function absolute_percent_error(y_true::Vector, y_pred::Vector)
     return(abs(percent_error(y_true, y_pred)))
 end
 
-function mean_error(y_true::Array, y_pred::Array)
+function mean_error(y_true::Vector, y_pred::Vector)
     return(mean(y_true - y_pred))
 end
 
-function mean_absolute_error(y_true::Array, y_pred::Array)
+function mean_absolute_error(y_true::Vector, y_pred::Vector)
     return(mean(absolute_error(y_true, y_pred)))
 end
 
-function median_absolute_error(y_true::Array, y_pred::Array)
+function median_absolute_error(y_true::Vector, y_pred::Vector)
     return(median(absolute_error(y_true, y_pred)))
 end
 
-function mean_percent_error(y_true::Array, y_pred::Array)
+function mean_percent_error(y_true::Vector, y_pred::Vector)
     return(mean(percent_error(y_true, y_pred)))
 end
 
-function median_percent_error(y_true::Array, y_pred::Array)
+function median_percent_error(y_true::Vector, y_pred::Vector)
     return(median(percent_error(y_true, y_pred)))
 end
 
-function mean_squared_error(y_true::Array, y_pred::Array)
+function mean_squared_error(y_true::Vector, y_pred::Vector)
     return(mean(squared_error(y_true, y_pred)))
 end
 
-function median_squared_error(y_true::Array, y_pred::Array)
+function median_squared_error(y_true::Vector, y_pred::Vector)
     return(median(squared_error(y_true, y_pred)))
 end
 
-function sum_squared_error(y_true::Array, y_pred::Array)
+function sum_squared_error(y_true::Vector, y_pred::Vector)
     return(sum(squared_error(y_true, y_pred)))
 end
 
-function mean_squared_log_error(y_true::Array, y_pred::Array)
+function mean_squared_log_error(y_true::Vector, y_pred::Vector)
     return(mean(squared_log_error(y_true, y_pred)))
 end
 
-function mean_absolute_percent_error(y_true::Array, y_pred::Array)
+function mean_absolute_percent_error(y_true::Vector, y_pred::Vector)
     return(mean(absolute_percent_error(y_true, y_pred)))
 end
 
-function median_absolute_percent_error(y_true::Array, y_pred::Array)
+function median_absolute_percent_error(y_true::Vector, y_pred::Vector)
     return(median(absolute_percent_error(y_true, y_pred)))
 end
 
-function symmetric_mean_absolute_percent_error(y_true::Array, y_pred::Array)
+function symmetric_mean_absolute_percent_error(y_true::Vector, y_pred::Vector)
     return(mean(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
 end
 
-function symmetric_median_absolute_percent_error(y_true::Array, y_pred::Array)
+function symmetric_median_absolute_percent_error(y_true::Vector, y_pred::Vector)
     return(median(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
 end
 
-function mean_absolute_scaled_error(y_true::Array, y_pred::Array)
+function mean_absolute_scaled_error(y_true::Vector, y_pred::Vector)
     n = max(length(y_true), length(y_pred))
     numerator = sum(abs(y_true - y_pred))
     denominator = (n / (n - 1)) * sum(abs(y_true[2:n] - y_pred[1:(n-1)]))
     return(numerator / denominator)
 end
 
-function total_variance_score(y_true::Array, y_pred::Array)
+function total_variance_score(y_true::Vector, y_pred::Vector)
     return(sum((y_true - mean(y_true)) .^ 2))
 end
 
-function explained_variance_score(y_true::Array, y_pred::Array)
+function explained_variance_score(y_true::Vector, y_pred::Vector)
     return(sum((y_pred - mean(y_true)) .^ 2))
 end
 
-function unexplained_variance_score(y_true::Array, y_pred::Array)
+function unexplained_variance_score(y_true::Vector, y_pred::Vector)
     return(sum((y_true - y_pred) .^ 2))
 end
 
-function r2_score(y_true::Array, y_pred::Array)
+function r2_score(y_true::Vector, y_pred::Vector)
     return(explained_variance_score(y_true, y_pred) / total_variance_score(y_true, y_pred))
 end
