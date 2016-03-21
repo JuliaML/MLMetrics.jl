@@ -1,3 +1,0 @@
-#
-# Optional time-consuming Benchmarks
-#
