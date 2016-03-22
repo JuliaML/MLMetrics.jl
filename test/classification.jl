@@ -14,11 +14,23 @@ y_pred = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1]
 @test true_negative(y_true, y_pred) == 4
 
 # false_positive
+@test false_positive(y_true, y_pred) == 4
+
 # false_negative
+@test false_negative(y_true, y_pred) == 4
+
 # condition_positive
+@test condition_positive(y_true, y_pred) == 8
+
 # condition_negative
+@test condition_negative(y_true, y_pred) == 8
+
 # predicted_condition_positive
+@test predicted_condition_positive(y_true, y_pred) == 8
+
 # predicted_condition_negative
+@test predicted_condition_negative(y_true, y_pred) == 8
+
 # accuracy_score
 # accuracy
 # prevalence
