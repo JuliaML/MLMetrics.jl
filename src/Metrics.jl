@@ -15,6 +15,7 @@ module Metrics
 ##############################################################################
 
 export @~,
+    check_args,
     absolute_error,
     percent_error,
     log_error,
