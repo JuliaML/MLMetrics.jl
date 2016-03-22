@@ -1,11 +1,11 @@
 function absolute_error(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
-    return(abs(y_true - y_pred))
+    return(abs(y_true .- y_pred))
 end
 
 function percent_error(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
-    return((y_true - y_pred) / y_true)
+    return((y_true .- y_pred) ./ y_true)
 end
 
 function log_error(y_true::Vector, y_pred::Vector)
