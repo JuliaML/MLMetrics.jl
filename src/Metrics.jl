@@ -78,7 +78,7 @@ export @~,
 
 filenames = [
     "classification.jl",
-    "common.jl"
+    "common.jl",
     "regression.jl"
   ]
 
