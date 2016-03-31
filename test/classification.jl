@@ -54,7 +54,7 @@ y_pred = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1]
 # true_positive_rate
 # sensitivity
 # recall
-@test positive_predictive_value(y_true, y_pred) == precision(y_true, y_pred) == precision(y_true, y_pred) == 0.5
+@test positive_predictive_value(y_true, y_pred) == precision(y_true, y_pred) == 0.5
 
 # false_positive_rate
 @test false_positive_rate(y_true, y_pred) == 0.5
