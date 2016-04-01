@@ -1,4 +1,4 @@
-module Metrics
+module MachineLearningMetrics
 
 ##############################################################################
 ##
@@ -86,4 +86,4 @@ for filename in filenames
     include(filename)
 end
 
-end # module Metrics
+end # module MachineLearningMetrics
