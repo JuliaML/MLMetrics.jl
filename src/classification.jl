@@ -45,8 +45,9 @@ end
 
 function accuracy_score(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
-    correct = true_positive(y_true, y_pred) + true_negative(y_true, y_pred)
-    return(correct / total_population(y_true, y_pred))
+    tp = true_positive(y_true, y_pred)
+    tn = true_negative(y_true, y_pred)
+    return((tp + tn) / total_population(y_true, y_pred))
 end
 
 accuracy = accuracy_score
