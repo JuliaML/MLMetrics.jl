@@ -7,7 +7,22 @@ MachineLearningMetrics.jl
 [![MachineLearningMetrics](http://pkg.julialang.org/badges/MachineLearningMetrics_0.4.svg)](http://pkg.julialang.org/?pkg=MachineLearningMetrics&ver=0.5)
 [![Coverage Status](https://coveralls.io/repos/paulhendricks/MachineLearningMetrics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/paulhendricks/MachineLearningMetrics.jl?branch=master)
 [![Build Status](https://travis-ci.org/paulhendricks/MachineLearningMetrics.jl.svg?branch=master)](https://travis-ci.org/paulhendricks/MachineLearningMetrics.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/56u32eosqom801ht?svg=true)](https://ci.appveyor.com/project/paulhendricks/metrics-jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj?svg=true)](https://ci.appveyor.com/project/paulhendricks/machinelearningmetrics-jl)
+
+master branch status badge
+SVG branch image URL
+
+https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj/branch/master?svg=true
+
+Raster branch image URL
+
+https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj/branch/master
+
+Branch sample markdown code
+
+[![Build status](https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj/branch/master?svg=true)](https://ci.appveyor.com/project/paulhendricks/machinelearningmetrics-jl/branch/master)
+
+
 
 `MachineLearningMetrics` is a set of tools for quickly scoring models in data science and machine learning. This toolset is written in Julia for blazing fast performance. This toolset's API follows that of Python's [sklearn.metrics](http://scikit-learn.org/stable/modules/classes.html#sklearn-metrics-metrics) as closely as possible so one can easily switch back and forth between Julia and Python without too much cognitive dissonance. The following types of metrics are currently implemented in `MachineLearningMetrics`:
 
