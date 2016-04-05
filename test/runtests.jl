@@ -3,7 +3,7 @@
 #
 
 using Base.Test
-using Metrics
+using MachineLearningMetrics
 
 my_tests = [
     "classification.jl",
