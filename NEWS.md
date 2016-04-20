@@ -1,4 +1,4 @@
-### MachineLearningMetrics 0.1.0
+### MLMetrics 0.1.0
 
 #### Improvements
 
