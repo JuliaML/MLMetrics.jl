@@ -2,7 +2,6 @@ MLMetrics.jl
 ======
 
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/0.1.0/active.svg)](http://www.repostatus.org/#active)
-[![MLMetrics](http://pkg.julialang.org/badges/MLMetrics_0.3.svg)](http://pkg.julialang.org/?pkg=MLMetrics&ver=0.3)
 [![MLMetrics](http://pkg.julialang.org/badges/MLMetrics_0.4.svg)](http://pkg.julialang.org/?pkg=MLMetrics&ver=0.4)
 [![MLMetrics](http://pkg.julialang.org/badges/MLMetrics_0.4.svg)](http://pkg.julialang.org/?pkg=MLMetrics&ver=0.5)
 [![Coverage Status](https://coveralls.io/repos/JuliaML/MLMetrics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaML/MLMetrics.jl?branch=master)
