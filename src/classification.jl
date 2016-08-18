@@ -257,15 +257,29 @@ accuracy = accuracy_score
 
 # ============================================================
 
+"""
+    precision(target, output)
 
+Fraction of positive predicted outcomes that are true positives.
+"""
 function Base.precision(target, output)
     @_dimcheck length(target) == length(output)
-    tp = true_positives(target, output)
-    pcp = predicted_condition_positive(target, output)
-    return(tp / pcp)
+    tp = 0; pcp = 0
+    @inbounds for i = 1:length(target)
+        tp  += true_positives(target[i], output[i])
+        pcp += predicted_condition_positive(target[i], output[i])
+    end
+    tp / pcp
 end
 
+"""
+    positive_predictive_value(target, output)
+
+Fraction of positive predicted outcomes that are true positives.
+"""
 positive_predictive_value = precision
+
+# ============================================================
 
 function false_discovery_rate(target, output)
     @_dimcheck length(target) == length(output)

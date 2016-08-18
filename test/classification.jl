@@ -1,5 +1,6 @@
 @testset "test that synonyms work"  begin
     @test accuracy === accuracy_score
+    @test precision === positive_predictive_value
 end
 
 y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
@@ -75,7 +76,8 @@ for (fun, ref) = ((true_positives,  5),
                   (condition_negative, 7),
                   (predicted_condition_positive, 8),
                   (predicted_condition_negative, 9),
-                  (_accuracy_score_nonorm, 9.))
+                  (_accuracy_score_nonorm, 9.),
+                  (positive_predictive_value, 5/8))
    @testset "$fun: check against known result" begin
         for (targets, outputs) = ((targets_p, outputs_p),
                                   (targets_m, outputs_m))
@@ -89,9 +91,6 @@ for (fun, ref) = ((true_positives,  5),
 end
 
 #=
-# positive_predictive_value
-# precision
-@test positive_predictive_value(y_true, y_hat) == precision(y_true, y_hat) == 0.5
 
 # false_discovery_rate
 @test false_discovery_rate(y_true, y_hat) == 0.5
