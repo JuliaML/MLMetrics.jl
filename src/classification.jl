@@ -5,15 +5,6 @@ typealias BINARY Union{Bool,Real}
 @inline is_negative{T<:Real}(value::T) = value <= zero(T)
 
 """
-    true_positives(target::Real, output::Real)
-
-Returns `1` if both target and output are equal and stricktly positive.
-Returns `0` otherwise.
-"""
-@inline true_positives(target::Real, output::Real) =
-    Int(target == output > 0)
-
-"""
     true_positives(target::Bool, output::Bool)
 
 Returns `1` if both target and output are `true`.
@@ -31,6 +22,15 @@ Returns `0` otherwise.
 """
 @inline true_positives(target::BINARY, output::BINARY) =
     Int(is_positive(target) && is_positive(output))
+
+"""
+    true_positives(target::Real, output::Real)
+
+Returns `1` if both target and output are equal and stricktly positive.
+Returns `0` otherwise.
+"""
+@inline true_positives(target::Real, output::Real) =
+    Int(target == output > 0)
 
 """
     true_positives(target::AbstractArray, output::AbstractArray)
@@ -52,13 +52,9 @@ end
 """
     true_negatives(target::Real, output::Real)
 
-Returns `1` if both target and output are equal and less or equal
-to zero. Returns `0` otherwise.
-"""
-@inline true_negatives(target::Real, output::Real) =
-    Int(target == output <= 0)
+Returns `1` if both target and output are less or equal to zero.
+Returns `0` otherwise.
 
-"""
     true_negatives(target::Bool, output::Bool)
 
 Returns `1` if both target and output are `false`.
@@ -76,6 +72,17 @@ Returns `0` otherwise.
 """
 @inline true_negatives(target::BINARY, output::BINARY) =
     Int(is_negative(target) && is_negative(output))
+
+#= Deactivated to make everything non positive a match
+"""
+    true_negatives(target::Real, output::Real)
+
+Returns `1` if both target and output are equal and less or equal
+to zero. Returns `0` otherwise.
+"""
+@inline true_negatives(target::Real, output::Real) =
+    Int(target == output <= 0)
+=#
 
 """
     true_negatives(target::AbstractArray, output::AbstractArray)
@@ -176,42 +183,80 @@ end
 
 # ============================================================
 
-function condition_positive(target, output)
+"""
+    condition_positive(target, output)
+
+returns the number of positive observations in `target`
+"""
+condition_positive(target, output) = sum(is_positive, target)
+
+"""
+    prevalence(target, output)
+
+returns the fraction of positive observations in `target`
+"""
+prevalence(target, output) = condition_positive(target, output) / length(target)
+
+"""
+    condition_negative(target, output)
+
+returns the number of negative observations in `target`
+"""
+condition_negative(target, output) = sum(is_negative, target)
+
+"""
+    predicted_condition_positive(target, output)
+
+returns the number of positive observations in `output`
+"""
+predicted_condition_positive(target, output) = sum(is_positive, output)
+
+"""
+    predicted_condition_negative(target, output)
+
+returns the number of negative observations in `output`
+"""
+predicted_condition_negative(target, output) = sum(is_negative, output)
+
+# ============================================================
+
+"""
+    accuracy(target, output; normalize = true)
+
+If `normalize` is `true`, the fraction of matching elements in
+`target` and `output` are returned.
+Otherwise the total number of matching elements are returned.
+"""
+function accuracy_score{T1<:BINARY,T2<:BINARY}(
+        target::AbstractVector{T1},
+        output::AbstractArray{T2};
+        normalize = true)
     @_dimcheck length(target) == length(output)
-    return(sum(target .== 1))
+    tp = 0; tn = 0
+    @inbounds for i = 1:length(target)
+        tp += true_positives(target[i], output[i])
+        tn += true_negatives(target[i], output[i])
+    end
+    correct = tp + tn
+    normalize ? correct/length(target) : Float64(correct)
 end
 
-function condition_negative(target, output)
+function accuracy_score(
+        target::AbstractVector,
+        output::AbstractArray;
+        normalize=true)
     @_dimcheck length(target) == length(output)
-    return(sum(target .== 0))
-end
-
-function predicted_condition_positive(target, output)
-    @_dimcheck length(target) == length(output)
-    return(sum(target .== 1))
-end
-
-function predicted_condition_negative(target, output)
-    @_dimcheck length(target) == length(output)
-    return(sum(output .== 0))
-end
-
-function accuracy_score(target, output)
-    @_dimcheck length(target) == length(output)
-    tp = true_positives(target, output)
-    tn = true_negatives(target, output)
-    tot_pop = length(target)
-    return((tp + tn) / tot_pop)
+    correct = 0
+    @inbounds for i = 1:length(target)
+        correct += target[i] == output[i]
+    end
+    normalize ? correct/length(target) : Float64(correct)
 end
 
 accuracy = accuracy_score
 
-function prevalence(target, output)
-    @_dimcheck length(target) == length(output)
-    cp = condition_positive(target, output)
-    tot_pop = length(target)
-    return(cp / tot_pop)
-end
+# ============================================================
+
 
 function Base.precision(target, output)
     @_dimcheck length(target) == length(output)

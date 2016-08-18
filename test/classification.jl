@@ -1,3 +1,7 @@
+@testset "test that synonyms work"  begin
+    @test accuracy === accuracy_score
+end
+
 y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
 y_true_m = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1]
 y_true_b = Vector{Bool}(y_true_p)
@@ -14,10 +18,10 @@ y_hat_mf = Vector{Float64}(y_hat_m)
 outputs_p = (y_hat_p, y_hat_b, y_hat_pf, y_hat_b')
 outputs_m = (y_hat_m, y_hat_b, y_hat_mf, y_hat_b')
 
-for (fun, mask, ref) = ((true_positives,  (0,0,0,1), 5),
-                        (true_negatives,  (1,0,0,0), 4),
-                        (false_positives, (0,1,0,0), 3),
-                        (false_negatives, (0,0,1,0), 5))
+for (fun, mask) = ((true_positives,  (0,0,0,1)),
+                   (true_negatives,  (1,0,0,0)),
+                   (false_positives, (0,1,0,0)),
+                   (false_negatives, (0,0,1,0)))
     @testset "$fun" begin
         @testset "Bool parameters" begin
             @test fun(false, false) === mask[1]
@@ -49,13 +53,35 @@ for (fun, mask, ref) = ((true_positives,  (0,0,0,1), 5),
                 end
             end
         end
-        @testset "check against known reference data" begin
-            for (targets, outputs) = ((targets_p, outputs_p),
-                                      (targets_m, outputs_m))
-                for target in targets, output in outputs
-                    @testset "$(target) against $(output)" begin
-                        @test fun(target, output) === ref
-                    end
+    end
+end
+
+@testset "multiclass sanity check" begin
+    # We count positive strickly positive matches as positives
+    @test true_positives([1,2,3,4], [1,3,2,4]) === 2
+    @test true_negatives([1,2,3,4], [4,3,2,1]) === 0
+    @test accuracy([1,2,3,4], [1,3,2,4]) === .5
+    @test accuracy([:a,:b,:b,:c], [:c,:b,:a,:a]) === .25
+end
+
+_accuracy_score_nonorm(t,o) = accuracy_score(t,o, normalize=false)
+for (fun, ref) = ((true_positives,  5),
+                  (true_negatives,  4),
+                  (false_positives, 3),
+                  (false_negatives, 5),
+                  (accuracy_score,  9/17),
+                  (prevalence,     10/17),
+                  (condition_positive, 10),
+                  (condition_negative, 7),
+                  (predicted_condition_positive, 8),
+                  (predicted_condition_negative, 9),
+                  (_accuracy_score_nonorm, 9.))
+   @testset "$fun: check against known result" begin
+        for (targets, outputs) = ((targets_p, outputs_p),
+                                  (targets_m, outputs_m))
+            for target in targets, output in outputs
+                @testset "$(typeof(target)) against $(typeof(output))" begin
+                    @test fun(target, output) === ref
                 end
             end
         end
@@ -63,25 +89,6 @@ for (fun, mask, ref) = ((true_positives,  (0,0,0,1), 5),
 end
 
 #=
-# condition_positive
-@test condition_positive(y_true, y_hat) == 8
-
-# condition_negative
-@test condition_negative(y_true, y_hat) == 8
-
-# predicted_condition_positive
-@test predicted_condition_positive(y_true, y_hat) == 8
-
-# predicted_condition_negative
-@test predicted_condition_negative(y_true, y_hat) == 8
-
-# accuracy_score
-# accuracy
-@test accuracy_score(y_true, y_hat) == accuracy(y_true, y_hat) == 0.5
-
-# prevalence
-@test accuracy(y_true, y_hat) == 0.5
-
 # positive_predictive_value
 # precision
 @test positive_predictive_value(y_true, y_hat) == precision(y_true, y_hat) == 0.5
