@@ -1,22 +1,20 @@
-#
-# Correctness Tests
-#
-
-using Base.Test
 using MLMetrics
 
-my_tests = [
+if VERSION >= v"0.5-"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
+
+tests = [
     "classification.jl",
     "regression.jl"
-  ]
+]
 
-println("Running tests:")
-
-for my_test in my_tests
-    try
-        include(my_test)
-        println("\tPASSED: $(my_test)")
-    catch e
-        println("\tFAILED: $(my_test)")
+for test in tests
+    @testset "$test" begin
+        include(test)
     end
 end
+

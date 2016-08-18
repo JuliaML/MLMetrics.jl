@@ -1,21 +1,7 @@
 module MLMetrics
 
-##############################################################################
-##
-## Dependencies
-##
-##############################################################################
+export
 
-
-
-##############################################################################
-##
-## Exported methods and types (in addition to everything reexported above)
-##
-##############################################################################
-
-export @~,
-    check_args,
     absolute_error,
     percent_error,
     log_error,
@@ -53,7 +39,7 @@ export @~,
     accuracy,
     prevalence,
     positive_predictive_value,
-    precision,
+    #precision,
     false_discovery_rate,
     negative_predictive_value,
     false_omission_rate,
@@ -70,20 +56,10 @@ export @~,
     f1_score,
     matthews_corrcoef
 
-##############################################################################
-##
-## Load files
-##
-##############################################################################
 
-filenames = [
-    "classification.jl",
-    "common.jl",
-    "regression.jl"
-  ]
-
-for filename in filenames
-    include(filename)
-end
+include("common.jl")
+include("classification.jl")
+include("regression.jl")
 
 end # module MLMetrics
+

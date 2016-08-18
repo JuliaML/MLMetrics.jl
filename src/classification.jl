@@ -60,14 +60,14 @@ function prevalence(y_true::Vector, y_pred::Vector)
     return(cp / tot_pop)
 end
 
-function positive_predictive_value(y_true::Vector, y_pred::Vector)
+function Base.precision(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
     tp = true_positive(y_true, y_pred)
     pcp = predicted_condition_positive(y_true, y_pred)
     return(tp / pcp)
 end
 
-precision = positive_predictive_value
+positive_predictive_value = precision
 
 function false_discovery_rate(y_true::Vector, y_pred::Vector)
     check_args(y_true, y_pred)
