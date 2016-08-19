@@ -1,6 +1,6 @@
 @testset "test that synonyms work"  begin
     @test accuracy === accuracy_score
-    @test precision === positive_predictive_value
+    @test precision_score === positive_predictive_value
 end
 
 y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
@@ -19,44 +19,59 @@ y_hat_mf = Vector{Float64}(y_hat_m)
 outputs_p = (y_hat_p, y_hat_b, y_hat_pf, y_hat_b')
 outputs_m = (y_hat_m, y_hat_b, y_hat_mf, y_hat_b')
 
+# Compare output of functions with single value parameters against mask
+# This also tests type stability
 for (fun, mask) = ((true_positives,  (0,0,0,1)),
                    (true_negatives,  (1,0,0,0)),
                    (false_positives, (0,1,0,0)),
-                   (false_negatives, (0,0,1,0)))
-    @testset "$fun" begin
+                   (false_negatives, (0,0,1,0)),
+                   (condition_positive, (0,0,1,1)),
+                   (condition_negative, (1,1,0,0)),
+                   (predicted_condition_positive, (0,1,0,1)),
+                   (predicted_condition_negative, (1,0,1,0)))
+    @testset "$fun: fuzzy binary matching" begin
         @testset "Bool parameters" begin
             @test fun(false, false) === mask[1]
             @test fun(false, true ) === mask[2]
             @test fun(true,  false) === mask[3]
             @test fun(true,  true ) === mask[4]
+            @test fun(false, false, FuzzyBinaryCompare()) === mask[1]
+            @test fun(false, true , FuzzyBinaryCompare()) === mask[2]
+            @test fun(true,  false, FuzzyBinaryCompare()) === mask[3]
+            @test fun(true,  true , FuzzyBinaryCompare()) === mask[4]
         end
         @testset "Real parameters" begin
             for pos = (1, 2), neg = (0, -1, -2)
                 for T1 = (Int32, Int64, Float32, Float64)
                     for T2 = (Int32, Int64, Float32, Float64)
                         @testset "$T1 against $T2" begin
-                            @test fun(T1(neg), T2(neg)) === mask[1]
-                            @test fun(T1(neg), T2(pos)) === mask[2]
-                            @test fun(T1(pos), T2(neg)) === mask[3]
-                            @test fun(T1(pos), T2(pos)) === mask[4]
+                            @test fun(T1(neg), T2(neg), FuzzyBinaryCompare()) === mask[1]
+                            @test fun(T1(neg), T2(pos), FuzzyBinaryCompare()) === mask[2]
+                            @test fun(T1(pos), T2(neg), FuzzyBinaryCompare()) === mask[3]
+                            @test fun(T1(pos), T2(pos), FuzzyBinaryCompare()) === mask[4]
                         end
                     end
                 end
             end
         end
         @testset "mixed parameters" begin
-            for pos = (1, true, 1.), neg = (0, -1, -2, false, 0.)
+            for pos = (1, true, 0.5, 1.), neg = (0, -1, -2, false, 0.)
                 @testset "pos = $pos, neg = $neg" begin
-                    @test fun(neg, neg) === mask[1]
-                    @test fun(neg, pos) === mask[2]
-                    @test fun(pos, neg) === mask[3]
-                    @test fun(pos, pos) === mask[4]
+                    @test fun(neg, neg, FuzzyBinaryCompare()) === mask[1]
+                    @test fun(neg, pos, FuzzyBinaryCompare()) === mask[2]
+                    @test fun(pos, neg, FuzzyBinaryCompare()) === mask[3]
+                    @test fun(pos, pos, FuzzyBinaryCompare()) === mask[4]
+                    if typeof(pos) <: Bool || typeof(neg) <: Bool
+                        @test fun(neg, pos) === mask[2]
+                        @test fun(pos, neg) === mask[3]
+                    end
                 end
             end
         end
     end
 end
 
+#=
 @testset "multiclass sanity check" begin
     # We count positive strickly positive matches as positives
     @test true_positives([1,2,3,4], [1,3,2,4]) === 2
@@ -64,32 +79,31 @@ end
     @test accuracy([1,2,3,4], [1,3,2,4]) === .5
     @test accuracy([:a,:b,:b,:c], [:c,:b,:a,:a]) === .25
 end
-
+=#
 _accuracy_score_nonorm(t,o) = accuracy_score(t,o, normalize=false)
 for (fun, ref) = ((true_positives,  5),
                   (true_negatives,  4),
                   (false_positives, 3),
                   (false_negatives, 5),
-                  (accuracy_score,  9/17),
                   (prevalence,     10/17),
                   (condition_positive, 10),
                   (condition_negative, 7),
                   (predicted_condition_positive, 8),
-                  (predicted_condition_negative, 9),
-                  (_accuracy_score_nonorm, 9.),
-                  (positive_predictive_value, 5/8))
+                  (predicted_condition_negative, 9))
+#                  (accuracy_score,  9/17),
+#                  (_accuracy_score_nonorm, 9.),
+#                  (positive_predictive_value, 5/8))
    @testset "$fun: check against known result" begin
         for (targets, outputs) = ((targets_p, outputs_p),
                                   (targets_m, outputs_m))
             for target in targets, output in outputs
                 @testset "$(typeof(target)) against $(typeof(output))" begin
-                    @test fun(target, output) === ref
+                    @test fun(target,output,FuzzyBinaryCompare())===ref
                 end
             end
         end
     end
 end
-
 #=
 
 # false_discovery_rate
