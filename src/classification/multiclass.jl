@@ -1,5 +1,148 @@
 # Binary and Multiclass
 
+
+# ============================================================
+
+"""
+This will allow for readable function definition such as
+
+    @cmetric "..." -> precision := true_positives / predicted_condition_positive
+
+with the added bonus of the functions being implemented in such
+a way as to avoid memory allocation and being able to compute
+their results in just one pass.
+"""
+macro cmetric(all)
+    @assert all.head == :->
+    docstr = all.args[1]
+    expr = all.args[2].args[2]
+    @assert expr.head == :(:=)
+    fun = expr.args[1]
+    @assert :/ == expr.args[2].args[1]
+    numer_fun = expr.args[2].args[2]
+    denom_fun = expr.args[2].args[3]
+    esc(quote
+        # explicit binary case
+        function $fun(target::AbstractVector,
+                      output::AbstractArray,
+                      bc::AbstractBinary)
+            @_dimcheck length(target) == length(output)
+            numer = 0; denom = 0
+            @inbounds for i = 1:length(target)
+                numer += $numer_fun(target[i], output[i], bc)
+                denom += $denom_fun(target[i], output[i], bc)
+            end
+            (numer / denom)::Float64
+        end
+
+        # fallback to try and choose compare mode automatically
+        function $fun(target::AbstractVector,
+                      output::AbstractArray;
+                      nargs...)
+            comp_mode = CompareMode.auto(target,output)
+            $fun(target, output, comp_mode; nargs...)
+        end
+
+        # add documentation to function
+        @eval @doc """$($docstr)""" $fun
+    end)
+end
+
+# ============================================================
+
+@cmetric """
+    positive_predictive_value(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of positive predicted outcomes that
+are true positives (as Float64).
+
+also known as: `precision_score`
+""" ->
+positive_predictive_value := true_positives / predicted_condition_positive
+
+precision_score = positive_predictive_value
+
+# ============================================================
+
+@cmetric """
+    false_discovery_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of positive predicted outcomes that
+are false positives (as Float64)
+""" ->
+false_discovery_rate := false_positives / predicted_condition_positive
+
+# ============================================================
+
+@cmetric """
+    negative_predictive_value(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of negative predicted outcomes that
+are true negatives (as Float64)
+""" ->
+negative_predictive_value := true_negatives / predicted_condition_negative
+
+# ============================================================
+
+@cmetric """
+    false_omission_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of negative predicted outcomes that
+are false negatives (as Float64)
+""" ->
+false_omission_rate := false_negatives / predicted_condition_negative
+
+# ============================================================
+
+@cmetric """
+    true_positive_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of truely positive observations that
+were predicted as positives (as Float64)
+
+also known as: `recall`, `sensitivity`
+""" ->
+true_positive_rate := true_positives / condition_positive
+
+sensitivity = true_positive_rate
+recall = true_positive_rate
+
+# ============================================================
+
+@cmetric """
+    false_positive_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of truely negative observations that
+were (wrongly) predicted as positives (as Float64)
+""" ->
+false_positive_rate := false_positives / condition_negative
+
+# ============================================================
+
+@cmetric """
+    false_negative_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of truely positive observations that
+were (wrongly) predicted as negative (as Float64)
+""" ->
+false_negative_rate := false_negatives / condition_positive
+
+# ============================================================
+
+@cmetric """
+    true_negative_rate(target, output, bc::(Fuzzy)Binary)
+
+Returns the fraction of negative predicted outcomes that
+are true negatives (as Float64).
+
+also known as: `specificity`
+""" ->
+true_negative_rate := true_negatives / condition_negative
+
+specificity = true_negative_rate
+
+# ============================================================
+
 """
     accuracy(target, output, bc::(Fuzzy)Binary; normalize = true)
 
@@ -47,112 +190,6 @@ function accuracy_score(target::AbstractVector,
 end
 
 accuracy = accuracy_score
-
-# ============================================================
-
-"""
-This will allow for readable function definition such as
-
-    @cmetric precision = true_positives / predicted_condition_positive
-
-with the added bonus of the functions being implemented in such
-a way as to avoid memory allocation and being able to compute
-their results in just one pass.
-"""
-macro cmetric(expr)
-    @assert expr.head == :(=)
-    fun = expr.args[1]
-    @assert :/ == expr.args[2].args[1]
-    numer_fun = expr.args[2].args[2]
-    denom_fun = expr.args[2].args[3]
-    esc(quote
-        function $fun(target::AbstractVector,
-                      output::AbstractArray,
-                      bc::AbstractBinary)
-            @_dimcheck length(target) == length(output)
-            numer = 0; denom = 0
-            @inbounds for i = 1:length(target)
-                numer += $numer_fun(target[i], output[i], bc)
-                denom += $denom_fun(target[i], output[i], bc)
-            end
-            (numer / denom)::Float64
-        end
-    end)
-end
-
-"""
-    positive_predictive_value(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of positive predicted outcomes that
-are true positives (as Float64).
-
-also known as: `precision_score`
-"""
-@cmetric positive_predictive_value = true_positives / predicted_condition_positive
-precision_score = positive_predictive_value
-
-"""
-    false_discovery_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of positive predicted outcomes that
-are false positives (as Float64)
-"""
-@cmetric false_discovery_rate = false_positives / predicted_condition_positive
-
-"""
-    negative_predictive_value(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of negative predicted outcomes that
-are true negatives (as Float64)
-"""
-@cmetric negative_predictive_value = true_negatives / predicted_condition_negative
-
-"""
-    false_omission_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of negative predicted outcomes that
-are false negatives (as Float64)
-"""
-@cmetric false_omission_rate = false_negatives / predicted_condition_negative
-
-"""
-    true_positive_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of truely positive observations that
-were predicted as positives (as Float64)
-
-also known as: `recall`, `sensitivity`
-"""
-@cmetric true_positive_rate = true_positives / condition_positive
-sensitivity = true_positive_rate
-recall = true_positive_rate
-
-"""
-    false_positive_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of truely negative observations that
-were (wrongly) predicted as positives (as Float64)
-"""
-@cmetric false_positive_rate = false_positives / condition_negative
-
-"""
-    false_negative_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of truely positive observations that
-were (wrongly) predicted as negative (as Float64)
-"""
-@cmetric false_negative_rate = false_negatives / condition_positive
-
-"""
-    true_negative_rate(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of negative predicted outcomes that
-are true negatives (as Float64).
-
-also known as: `specificity`
-"""
-@cmetric true_negative_rate = true_negatives / condition_negative
-specificity = true_negative_rate
 
 # ============================================================
 
