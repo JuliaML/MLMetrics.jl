@@ -1,12 +1,14 @@
-# ============================================================
-# (Fuzzy)Binary only: Define what it means to be positive / negative
+# (Fuzzy)Binary only
 
-@inline is_positive(value) = _ambiguous()
+# ============================================================
+# Define what it means to be positive / negative
+
+@inline is_positive(value) = CompareMode._ambiguous()
 @inline is_positive(value, bc::Binary) = (value == bc.pos_label)
 @inline is_positive(value::Bool) = value
 @inline is_positive{T<:Real}(value::T) = (value > zero(T))
 
-@inline is_negative(value) = _ambiguous()
+@inline is_negative(value) = CompareMode._ambiguous()
 @inline is_negative(value, bc::Binary) = (value != bc.pos_label)
 @inline is_negative{T<:Real}(value::T) = (value <= zero(T))
 
@@ -212,32 +214,17 @@ for fun in (:true_positives,  :true_negatives,
             $($fun_name)(target, output)
 
         If either `target` or `output` is of type `Bool` then
-        `FuzzyBinary` is inferred to compute the
+        `FuzzyBinary` is inferred as compare mode to compute the
         **$($fun_desc)**. Any other type combination is ambiguous
         and will result in an error.
         """ ->
         ($fun)(target, output) = ($fun)(target, output, CompareMode.auto(target,output))
     end
 
-    # Default to fuzzy comparison if boolean values are involed
-    for _T2 in (:Bool, :Real, :Any)
-        @eval begin
-            ($fun)(target::$_T2, output::Bool) =
-                ($fun)(target, output, FuzzyBinary())
-            ($fun)(target::Bool, output::$_T2) =
-                ($fun)(target, output, FuzzyBinary())
-        end
-    end
-end
+    # prealence is a special case that only needs the fallback
+    if fun == :prevalence; continue; end
 
-# ============================================================
-# (Fuzzy)Binary: Generate shared accumulator
-for fun in (:true_positives,  :true_negatives,
-            :false_positives, :false_negatives,
-            :condition_positive, :condition_negative,
-            :predicted_condition_positive, :predicted_condition_negative)
-    fun_name = string(fun)
-    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
+    # (Fuzzy)Binary: Generate shared accumulator
     @eval @doc """
         $($fun_name)(target::AbstractVector, output::AbstractArray, bc::(Fuzzy)Binary)
 
@@ -258,172 +245,5 @@ for fun in (:true_positives,  :true_negatives,
             result
         end
     end
-end
-
-# ============================================================
-
-"""
-    accuracy(target, output, bc::(Fuzzy)Binary; normalize = true)
-
-If `normalize` is `true`, the fraction of correctly classified
-observations is returned. Returns the total number otherwise.
-"""
-function accuracy_score(target::AbstractVector,
-                        output::AbstractArray,
-                        bc::AbstractBinary;
-                        normalize = true)
-    @_dimcheck length(target) == length(output)
-    tp = 0; tn = 0
-    @inbounds for i = 1:length(target)
-        tp += true_positives(target[i], output[i], bc)
-        tn += true_negatives(target[i], output[i], bc)
-    end
-    correct = tp + tn
-    normalize ? correct/length(target) : Float64(correct)
-end
-
-"""
-    accuracy(target, output, [mc::MultiClass]; normalize = true)
-
-If `normalize` is `true`, the fraction of matching elements in
-`target` and `output` are returned.
-Otherwise the total number of matching elements are returned.
-"""
-function accuracy_score(target::AbstractVector,
-                        output::AbstractArray,
-                        mc::AbstractMultiClass;
-                        normalize = true)
-    @_dimcheck length(target) == length(output)
-    correct = 0
-    @inbounds for i = 1:length(target)
-        correct += target[i] == output[i]
-    end
-    normalize ? correct/length(target) : Float64(correct)
-end
-
-function accuracy_score(target::AbstractVector,
-                        output::AbstractArray;
-                        nargs...)
-    accuracy_score(target, output, FuzzyMultiClass(); nargs...)::Float64
-end
-
-accuracy = accuracy_score
-
-# ============================================================
-
-"""
-    precision_score(target, output, bc::(Fuzzy)Binary)
-
-Returns the fraction of positive predicted outcomes that
-are true positives (as Float64).
-"""
-function precision_score(target::AbstractVector,
-                         output::AbstractArray,
-                         bc::AbstractBinary)
-    @_dimcheck length(target) == length(output)
-    tp = 0; pcp = 0
-    @inbounds for i = 1:length(target)
-        tp  += true_positives(target[i], output[i], bc)
-        pcp += predicted_condition_positive(target[i], output[i], bc)
-    end
-    tp / pcp
-end
-
-positive_predictive_value = precision_score
-
-# ============================================================
-
-function false_discovery_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    fp = false_positives(target, output)
-    pcp = predicted_condition_positive(target, output)
-    return(fp / pcp)
-end
-
-function negative_predictive_value(target, output)
-    @_dimcheck length(target) == length(output)
-    tn = true_negatives(target, output)
-    pcn = predicted_condition_negative(target, output)
-    return(tn / pcn)
-end
-
-function false_omission_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    fn = false_negatives(target, output)
-    pcn = predicted_condition_negative(target, output)
-    return(fn / pcn)
-end
-
-function true_positive_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    tp = true_positives(target, output)
-    cp = condition_positive(target, output)
-    return(tp / cp)
-end
-
-sensitivity = true_positive_rate
-recall = true_positive_rate
-
-function false_positive_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    fp = false_positives(target, output)
-    cn = condition_negative(target, output)
-    return(fp / cn)
-end
-
-function false_negative_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    fn = false_negatives(target, output)
-    cp = condition_positive(target, output)
-    return(fn / cp)
-end
-
-function true_negative_rate(target, output)
-    @_dimcheck length(target) == length(output)
-    tn = true_negatives(target, output)
-    cn = condition_negative(target, output)
-    return(tn / cn)
-end
-
-specificity = true_negative_rate
-
-function positive_likelihood_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    tpr = true_positive_rate(target, output)
-    fpr = false_positive_rate(target, output)
-    return(tpr / fpr)
-end
-
-function negative_likelihood_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    fnr = false_negative_rate(target, output)
-    tnr = true_negative_rate(target, output)
-    return(fnr / tnr)
-end
-
-function diagnostic_odds_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    plr = positive_likelihood_ratio(target, output)
-    nlr = negative_likelihood_ratio(target, output)
-    return(plr / nlr)
-end
-
-function f1_score(target, output)
-    @_dimcheck length(target) == length(output)
-    tp = true_positives(target, output)
-    fp = false_positives(target, output)
-    fn = false_negatives(target, output)
-    return((2 * tp) / (2 * tp + fp + fn))
-end
-
-function matthews_corrcoef(target, output)
-    @_dimcheck length(target) == length(output)
-    tp = true_positives(target, output)
-    tn = true_negatives(target, output)
-    fp = false_positives(target, output)
-    fn = false_negatives(target, output)
-    numerator = (tp * tn) - (fp * fn)
-    denominator = (tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)
-    return(numerator / (denominator ^ 0.5))
 end
 

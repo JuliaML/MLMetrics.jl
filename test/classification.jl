@@ -3,6 +3,34 @@
     @test type_2_errors === false_negatives
     @test accuracy === accuracy_score
     @test precision_score === positive_predictive_value
+    @test sensitivity === true_positive_rate
+    @test recall === true_positive_rate
+    @test specificity === true_negative_rate
+end
+
+@testset "internal unit tests" begin
+    @test MLMetrics.is_positive(1)
+    @test MLMetrics.is_positive(1.0)
+    @test !MLMetrics.is_positive(0)
+    @test !MLMetrics.is_positive(0.)
+    @test !MLMetrics.is_positive(-1)
+    @test !MLMetrics.is_positive(-1.0)
+    @test MLMetrics.is_positive(true)
+    @test !MLMetrics.is_positive(false)
+    @test_throws ArgumentError MLMetrics.is_positive("a")
+    @test MLMetrics.is_positive("a", Binary("a"))
+    @test !MLMetrics.is_positive("a", Binary("b"))
+    @test !MLMetrics.is_negative(1)
+    @test !MLMetrics.is_negative(1.0)
+    @test MLMetrics.is_negative(0)
+    @test MLMetrics.is_negative(0.)
+    @test MLMetrics.is_negative(-1)
+    @test MLMetrics.is_negative(-1.0)
+    @test !MLMetrics.is_negative(true)
+    @test MLMetrics.is_negative(false)
+    @test_throws ArgumentError MLMetrics.is_negative("a")
+    @test !MLMetrics.is_negative("a", Binary("a"))
+    @test MLMetrics.is_negative("a", Binary("b"))
 end
 
 y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
@@ -10,16 +38,14 @@ y_true_m = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1]
 y_true_b = Vector{Bool}(y_true_p)
 y_true_pf = Vector{Float64}(y_true_p)
 y_true_mf = Vector{Float64}(y_true_m)
-targets_p = (y_true_p, y_true_b, y_true_pf)
-targets_m = (y_true_m, y_true_b, y_true_mf)
+targets = (y_true_p, y_true_m, y_true_b, y_true_pf, y_true_mf)
 
 y_hat_p  = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0]
 y_hat_m  = [1, 1,-1,-1, 1,-1, 1,-1,-1, 1,-1, 1,-1, 1,-1, 1,-1]
 y_hat_b  = Vector{Bool}(y_hat_p)
 y_hat_pf = Vector{Float64}(y_hat_p)
 y_hat_mf = Vector{Float64}(y_hat_m)
-outputs_p = (y_hat_p, y_hat_b, y_hat_pf, y_hat_b')
-outputs_m = (y_hat_m, y_hat_b, y_hat_mf, y_hat_b')
+outputs = (y_hat_p, y_hat_m, y_hat_b, y_hat_pf, y_hat_mf, y_hat_b')
 
 # Compare output of functions with single value parameters against mask
 # This also tests type stability
@@ -94,44 +120,24 @@ for (fun, ref) = ((true_positives,  5),
                   (predicted_condition_negative, 9),
                   (accuracy_score,  9/17),
                   (_accuracy_score_nonorm, 9.),
-                  (positive_predictive_value, 5/8))
+                  (positive_predictive_value, 5/8),
+                  (false_discovery_rate, 3/8),
+                  (negative_predictive_value, 4/9),
+                  (false_omission_rate, 5/9),
+                  (true_positive_rate, 5/10),
+                  (false_positive_rate, 3/7),
+                  (false_negative_rate, 5/10),
+                  (true_negative_rate, 4/7))
    @testset "$fun: check against known result" begin
-        for (targets, outputs) = ((targets_p, outputs_p),
-                                  (targets_m, outputs_m))
-            for target in targets, output in outputs
-                @testset "$(typeof(target)) against $(typeof(output))" begin
-                    @test fun(target,output,FuzzyBinary())===ref
-                end
+        for target in targets, output in outputs
+            @testset "$(typeof(target)) against $(typeof(output))" begin
+                @test fun(target, output, FuzzyBinary()) === ref
             end
         end
     end
 end
+
 #=
-
-# false_discovery_rate
-@test false_discovery_rate(y_true, y_hat) == 0.5
-
-# negative_predictive_value
-@test negative_predictive_value(y_true, y_hat) == 0.5
-
-# false_omission_rate
-@test false_omission_rate(y_true, y_hat) == 0.5
-
-# true_positive_rate
-# sensitivity
-# recall
-@test positive_predictive_value(y_true, y_hat) == precision(y_true, y_hat) == 0.5
-
-# false_positive_rate
-@test false_positive_rate(y_true, y_hat) == 0.5
-
-# false_negative_rate
-@test false_negative_rate(y_true, y_hat) == 0.5
-
-# true_negative_rate
-# specificity
-@test true_negative_rate(y_true, y_hat) == specificity(y_true, y_hat) == 0.5
-
 # positive_likelihood_ratio
 @test positive_likelihood_ratio(y_true, y_hat) == 1.0
 

@@ -61,12 +61,13 @@ export
 
 
 include("common.jl")
-include("comparemode.jl")
+include("classification/comparemode.jl")
 
 using MLMetrics.CompareMode
 using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass
 
-include("classification.jl")
+include("classification/binary.jl")
+include("classification/multiclass.jl")
 include("regression.jl")
 
 end # module MLMetrics

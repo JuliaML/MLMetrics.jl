@@ -97,6 +97,7 @@ auto(target::AbstractVector{Bool}, output::AbstractArray{Bool}) =
     FuzzyBinary()
 
 # Generate the Bool combinations to avoid ambuguity warnings
+auto(target::Bool, output::Bool) = FuzzyBinary()
 for _T2 in (:Bool, :Real, :Any)
     @eval begin
         auto{T2<:$_T2}(target::AbstractVector{T2},
