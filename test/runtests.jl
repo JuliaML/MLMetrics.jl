@@ -1,4 +1,5 @@
 using MLMetrics
+using MLMetrics.CompareMode
 
 if VERSION >= v"0.5-"
     using Base.Test

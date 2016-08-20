@@ -2,8 +2,7 @@ module MLMetrics
 
 export
 
-    BinaryCompare,
-    FuzzyBinaryCompare,
+    CompareMode,
 
     absolute_error,
     percent_error,
@@ -32,7 +31,9 @@ export
     true_positives,
     true_negatives,
     false_positives,
+    type_1_errors,
     false_negatives,
+    type_2_errors,
     condition_positive,
     condition_negative,
     predicted_condition_positive,
@@ -60,6 +61,11 @@ export
 
 
 include("common.jl")
+include("comparemode.jl")
+
+using MLMetrics.CompareMode
+using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass
+
 include("classification.jl")
 include("regression.jl")
 

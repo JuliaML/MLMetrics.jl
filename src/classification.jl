@@ -1,103 +1,63 @@
-_ambiguous() = throw(ArgumentError("Can't infer the comparison mode because argument types are ambigous. Please specify the desired subtype of LabelCompare manually."))
-pos_examples = "Positive examples: `1`, `2.0`, `true`, `0.5`, `:2`."
-neg_examples = "Negative examples: `0`, `-1`, `0.0`, `-0.5`, `false`, `:0`."
-
-"""
-    abstract LabelCompare
-
-The type of classification problem. Example for concrete types
-are `FuzzyBinaryCompare``BinaryCompare`, `MultiClassCompare`,
-or `MultiLabel`.
-"""
-abstract LabelCompare
-
-"""
-    FuzzyBinaryCompare()
-
-Defines the situation as a binary classification problem.
-Fuzzy means that one consideres a positive match if both values
-are considered stricktly positive on their own, and a negative
-match if both values are considered zero or negative.
-Other than that the values are not compared to each other.
-
-- $pos_examples
-- $neg_examples
-"""
-immutable FuzzyBinaryCompare <: LabelCompare end
-
-"""
-    BinaryCompare(pos_label)
-
-Defines the situation as a binary classification problem.
-By setting `pos_label` one can specify which value represents
-the positive class. Because the problem is assumed to be binary
-any value that does not match `pos_label` will be assumed to be
-of the negative class.
-"""
-immutable BinaryCompare{T} <: LabelCompare
-    pos_label::T
-end
-
 # ============================================================
 # (Fuzzy)Binary only: Define what it means to be positive / negative
 
 @inline is_positive(value) = _ambiguous()
-@inline is_positive(value, bc::BinaryCompare) = (value == bc.pos_label)
+@inline is_positive(value, bc::Binary) = (value == bc.pos_label)
 @inline is_positive(value::Bool) = value
 @inline is_positive{T<:Real}(value::T) = (value > zero(T))
 
 @inline is_negative(value) = _ambiguous()
-@inline is_negative(value, bc::BinaryCompare) = (value != bc.pos_label)
+@inline is_negative(value, bc::Binary) = (value != bc.pos_label)
 @inline is_negative{T<:Real}(value::T) = (value <= zero(T))
 
 # ============================================================
 
 """
-    true_positives(target, output, ::FuzzyBinaryCompare)
+    true_positives(target, output, ::FuzzyBinary)
 
 Returns `1` if both target and output are considered stricktly
 positive on their own. They are not compared to each other.
 Returns `0` otherwise.
 $pos_examples
 """
-@inline true_positives(target, output, ::FuzzyBinaryCompare) =
+@inline true_positives(target, output, ::FuzzyBinary) =
     Int(is_positive(target) && is_positive(output))
 
 """
-    true_positives(target, output, bc::BinaryCompare)
+    true_positives(target, output, bc::Binary)
 
 Returns `1` if both, `target` and `output` are equal to
 `bc.pos_label`. Returns `0` otherwise.
 """
-@inline true_positives(target, output, bc::BinaryCompare) =
+@inline true_positives(target, output, bc::Binary) =
     Int(is_positive(target, bc) && is_positive(output, bc))
 
 # ============================================================
 
 """
-    true_negatives(target, output, ::FuzzyBinaryCompare)
+    true_negatives(target, output, ::FuzzyBinary)
 
 Returns `1` if both target and output are considered zero or
 negative on their own. They are not compared to each other.
 Returns `0` otherwise.
 $neg_examples
 """
-@inline true_negatives(target, output, ::FuzzyBinaryCompare) =
+@inline true_negatives(target, output, ::FuzzyBinary) =
     Int(is_negative(target) && is_negative(output))
 
 """
-    true_negatives(target, output, bc::BinaryCompare)
+    true_negatives(target, output, bc::Binary)
 
 Returns `1` if both, `target` and `output` are **not** equal to
 `bc.pos_label`. Returns `0` otherwise.
 """
-@inline true_negatives(target, output, bc::BinaryCompare) =
+@inline true_negatives(target, output, bc::Binary) =
     Int(is_negative(target, bc) && is_negative(output, bc))
 
 # ============================================================
 
 """
-    false_positives(target, output, ::FuzzyBinaryCompare)
+    false_positives(target, output, ::FuzzyBinary)
 
 Returns `1` if `target` is considered zero or negative,
 and `output` is considered stricktly positive.
@@ -105,22 +65,24 @@ Returns `0` otherwise.
 $pos_examples
 $neg_examples
 """
-@inline false_positives(target, output, ::FuzzyBinaryCompare) =
+@inline false_positives(target, output, ::FuzzyBinary) =
     Int(is_negative(target) && is_positive(output))
 
 """
-    false_positives(target, output, bc::BinaryCompare)
+    false_positives(target, output, bc::Binary)
 
 Returns `1` if `target` is **not** equal to `bc.pos_label,
 while `output` is equal to it. Returns `0` otherwise.
 """
-@inline false_positives(target, output, bc::BinaryCompare) =
+@inline false_positives(target, output, bc::Binary) =
     Int(is_negative(target, bc) && is_positive(output, bc))
+
+type_1_errors = false_positives
 
 # ============================================================
 
 """
-    false_negatives(target, output, ::FuzzyBinaryCompare)
+    false_negatives(target, output, ::FuzzyBinary)
 
 Returns `1` if `target` is considered strickly positive,
 and `output` is considered zero or negative.
@@ -128,41 +90,43 @@ Returns `0` otherwise.
 $pos_examples
 $neg_examples
 """
-@inline false_negatives(target, output, ::FuzzyBinaryCompare) =
+@inline false_negatives(target, output, ::FuzzyBinary) =
     Int(is_positive(target) && is_negative(output))
 
 """
-    false_negatives(target, output, bc::BinaryCompare)
+    false_negatives(target, output, bc::Binary)
 
 Returns `1` if `target` is equal to `bc.pos_label,
 while `output` is **not** equal to it. Returns `0` otherwise.
 """
-@inline false_negatives(target, output, bc::BinaryCompare) =
+@inline false_negatives(target, output, bc::Binary) =
     Int(is_positive(target, bc) && is_negative(output, bc))
+
+type_2_errors = false_negatives
 
 # ============================================================
 
 """
-    condition_positive(target, output, ::FuzzyBinaryCompare)
+    condition_positive(target, output, ::FuzzyBinary)
 
 Returns `1` if `target` is considered strictly positive.
 Returns `0` otherwise.
 $pos_examples
 """
-@inline condition_positive(target, output, ::FuzzyBinaryCompare) =
+@inline condition_positive(target, output, ::FuzzyBinary) =
     Int(is_positive(target))
 
 """
-    condition_positive(target, output, bc::BinaryCompare)
+    condition_positive(target, output, bc::Binary)
 
 Returns `1` if `target` is equal to `bc.pos_label.
 Returns `0` otherwise.
 """
-@inline condition_positive(target, output, bc::BinaryCompare) =
+@inline condition_positive(target, output, bc::Binary) =
     Int(is_positive(target, bc))
 
 """
-    prevalence(target, output, bc::(Fuzzy)BinaryCompare)
+    prevalence(target, output, bc::(Fuzzy)Binary)
 
 Returns the fraction of positive observations in `target`.
 What constitudes as positive depends on `bc`
@@ -173,64 +137,64 @@ prevalence(target, output, bc) =
 # ============================================================
 
 """
-    condition_negative(target, output, ::FuzzyBinaryCompare)
+    condition_negative(target, output, ::FuzzyBinary)
 
 Returns `1` if `target` is considered zero or negative.
 Returns `0` otherwise.
 $neg_examples
 """
-@inline condition_negative(target, output, ::FuzzyBinaryCompare) =
+@inline condition_negative(target, output, ::FuzzyBinary) =
     Int(is_negative(target))
 
 """
-    condition_negative(target, output, bc::BinaryCompare)
+    condition_negative(target, output, bc::Binary)
 
 Returns `1` if `target` is **not** equal to `bc.pos_label.
 Returns `0` otherwise.
 """
-@inline condition_negative(target, output, bc::BinaryCompare) =
+@inline condition_negative(target, output, bc::Binary) =
     Int(is_negative(target, bc))
 
 # ============================================================
 
 """
-    predicted_condition_positive(target, output, ::FuzzyBinaryCompare)
+    predicted_condition_positive(target, output, ::FuzzyBinary)
 
 Returns `1` if `output` is considered strictly positive.
 Returns `0` otherwise.
 $pos_examples
 """
-@inline predicted_condition_positive(target, output, ::FuzzyBinaryCompare) =
+@inline predicted_condition_positive(target, output, ::FuzzyBinary) =
     Int(is_positive(output))
 
 """
-    predicted_condition_positive(target, output, bc::BinaryCompare)
+    predicted_condition_positive(target, output, bc::Binary)
 
 Returns `1` if `output` is equal to `bc.pos_label.
 Returns `0` otherwise.
 """
-@inline predicted_condition_positive(target, output, bc::BinaryCompare) =
+@inline predicted_condition_positive(target, output, bc::Binary) =
     Int(is_positive(output, bc))
 
 # ============================================================
 
 """
-    predicted_condition_negative(target, output, ::FuzzyBinaryCompare)
+    predicted_condition_negative(target, output, ::FuzzyBinary)
 
 Returns `1` if `output` is considered zero or negative.
 Returns `0` otherwise.
 $neg_examples
 """
-@inline predicted_condition_negative(target, output, ::FuzzyBinaryCompare) =
+@inline predicted_condition_negative(target, output, ::FuzzyBinary) =
     Int(is_negative(output))
 
 """
-    predicted_condition_negative(target, output, bc::BinaryCompare)
+    predicted_condition_negative(target, output, bc::Binary)
 
 Returns `1` if `output` is **not** equal to `bc.pos_label.
 Returns `0` otherwise.
 """
-@inline predicted_condition_negative(target, output, bc::BinaryCompare) =
+@inline predicted_condition_negative(target, output, bc::Binary) =
     Int(is_negative(output, bc))
 
 # ============================================================
@@ -242,59 +206,32 @@ for fun in (:true_positives,  :true_negatives,
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
 
-    # Throw informative error in ambiguous case
+    # Generic fallback. Tries to infer compare mode
     @eval begin
         @doc """
             $($fun_name)(target, output)
 
         If either `target` or `output` is of type `Bool` then
-        `FuzzyBinaryCompare` is inferred to compute the
+        `FuzzyBinary` is inferred to compute the
         **$($fun_desc)**. Any other type combination is ambiguous
         and will result in an error.
         """ ->
-        ($fun)(target, output) = _ambiguous()
+        ($fun)(target, output) = ($fun)(target, output, CompareMode.auto(target,output))
     end
 
     # Default to fuzzy comparison if boolean values are involed
-    @eval ($fun)(target::AbstractVector{Bool},
-                 output::AbstractArray{Bool}) =
-            ($fun)(target, output, FuzzyBinaryCompare())
     for _T2 in (:Bool, :Real, :Any)
         @eval begin
-            ($fun){T2<:$_T2}(target::AbstractVector{T2},
-                             output::AbstractArray{Bool}) =
-                ($fun)(target, output, FuzzyBinaryCompare())
-            ($fun){T2<:$_T2}(target::AbstractVector{Bool},
-                             output::AbstractArray{T2}) =
-                ($fun)(target, output, FuzzyBinaryCompare())
             ($fun)(target::$_T2, output::Bool) =
-                ($fun)(target, output, FuzzyBinaryCompare())
+                ($fun)(target, output, FuzzyBinary())
             ($fun)(target::Bool, output::$_T2) =
-                ($fun)(target, output, FuzzyBinaryCompare())
-        end
-    end
-
-    # Try to determine if binary or multiclass.
-    # Note that this function can not be type stable,
-    # because multi class returns a Vector,
-    # while binary returns a Float64.
-    # As a side note: we know it is not multilabel because
-    # target is restricted to be a vector
-    @eval function ($fun){T1<:Real, T2<:Real}(
-            target::AbstractVector{T1},
-            output::AbstractArray{T2})
-        labels = union(target, output)
-        if length(labels) == 2
-            ($fun)(target, output, BinaryCompare(maximum(labels)))
-        else
-            # TODO: return multiclass version
-            error("multiclass not yet implemented")
+                ($fun)(target, output, FuzzyBinary())
         end
     end
 end
 
 # ============================================================
-# (Fuzzy)BinaryCompare: Generate shared accumulator
+# (Fuzzy)Binary: Generate shared accumulator
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
             :condition_positive, :condition_negative,
@@ -302,14 +239,14 @@ for fun in (:true_positives,  :true_negatives,
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
     @eval @doc """
-        $($fun_name)(target::AbstractVector, output::AbstractArray, bc::(Fuzzy)BinaryCompare)
+        $($fun_name)(target::AbstractVector, output::AbstractArray, bc::(Fuzzy)Binary)
 
     Counts the total number of **$($fun_desc)** in `output` by
     comparing each element against the corresponding value in
     `target` according to `bc`. Both parameters are expected
     to be vectors, but `output` is allowed to be a row-vector.
     """ $fun
-    for _T in (:FuzzyBinaryCompare, :BinaryCompare)
+    for _T in (:FuzzyBinary, :Binary) # avoid ambiguity warnings
         @eval function ($fun)(target::AbstractVector,
                               output::AbstractArray,
                               compare::$_T)
@@ -326,30 +263,36 @@ end
 # ============================================================
 
 """
-    accuracy(target, output; normalize = true)
+    accuracy(target, output, bc::(Fuzzy)Binary; normalize = true)
 
-If `normalize` is `true`, the fraction of matching elements in
-`target` and `output` are returned.
-Otherwise the total number of matching elements are returned.
+If `normalize` is `true`, the fraction of correctly classified
+observations is returned. Returns the total number otherwise.
 """
-function accuracy_score{T1<:Union{Bool,Real},T2<:Union{Bool,Real}}(
-        target::AbstractVector{T1},
-        output::AbstractArray{T2};
-        normalize = true)
+function accuracy_score(target::AbstractVector,
+                        output::AbstractArray,
+                        bc::AbstractBinary;
+                        normalize = true)
     @_dimcheck length(target) == length(output)
     tp = 0; tn = 0
     @inbounds for i = 1:length(target)
-        tp += true_positives(target[i], output[i])
-        tn += true_negatives(target[i], output[i])
+        tp += true_positives(target[i], output[i], bc)
+        tn += true_negatives(target[i], output[i], bc)
     end
     correct = tp + tn
     normalize ? correct/length(target) : Float64(correct)
 end
 
-function accuracy_score(
-        target::AbstractVector,
-        output::AbstractArray;
-        normalize = true)
+"""
+    accuracy(target, output, [mc::MultiClass]; normalize = true)
+
+If `normalize` is `true`, the fraction of matching elements in
+`target` and `output` are returned.
+Otherwise the total number of matching elements are returned.
+"""
+function accuracy_score(target::AbstractVector,
+                        output::AbstractArray,
+                        mc::AbstractMultiClass;
+                        normalize = true)
     @_dimcheck length(target) == length(output)
     correct = 0
     @inbounds for i = 1:length(target)
@@ -358,30 +301,34 @@ function accuracy_score(
     normalize ? correct/length(target) : Float64(correct)
 end
 
+function accuracy_score(target::AbstractVector,
+                        output::AbstractArray;
+                        nargs...)
+    accuracy_score(target, output, FuzzyMultiClass(); nargs...)::Float64
+end
+
 accuracy = accuracy_score
 
 # ============================================================
 
 """
-    precision_score(target, output)
+    precision_score(target, output, bc::(Fuzzy)Binary)
 
-Fraction of positive predicted outcomes that are true positives.
+Returns the fraction of positive predicted outcomes that
+are true positives (as Float64).
 """
-function precision_score(target, output)
+function precision_score(target::AbstractVector,
+                         output::AbstractArray,
+                         bc::AbstractBinary)
     @_dimcheck length(target) == length(output)
     tp = 0; pcp = 0
     @inbounds for i = 1:length(target)
-        tp  += true_positives(target[i], output[i])
-        pcp += predicted_condition_positive(target[i], output[i])
+        tp  += true_positives(target[i], output[i], bc)
+        pcp += predicted_condition_positive(target[i], output[i], bc)
     end
     tp / pcp
 end
 
-"""
-    positive_predictive_value(target, output)
-
-Fraction of positive predicted outcomes that are true positives.
-"""
 positive_predictive_value = precision_score
 
 # ============================================================
