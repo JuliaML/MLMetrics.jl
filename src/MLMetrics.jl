@@ -3,6 +3,7 @@ module MLMetrics
 export
 
     CompareMode,
+    AverageMode,
 
     absolute_error,
     percent_error,
@@ -61,7 +62,11 @@ export
 
 
 include("common.jl")
+include("averagemode.jl")
 include("classification/comparemode.jl")
+
+#using MLMetrics.AverageMode
+using MLMetrics.AverageMode.AvgMode
 
 using MLMetrics.CompareMode
 using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass

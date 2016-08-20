@@ -6,10 +6,12 @@ export
     Micro,
     Weighted
 
-immutable None end
-immutable Macro end
-immutable Micro end
-immutable Weighted end
+abstract AvgMode
+
+immutable None <: AvgMode end
+immutable Macro <: AvgMode end
+immutable Micro <: AvgMode end
+immutable Weighted <: AvgMode end
 
 end
 
