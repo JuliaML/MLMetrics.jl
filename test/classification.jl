@@ -1,36 +1,12 @@
+using MLLabelUtils.LabelEnc.FuzzyBinary
+
 @testset "test that synonyms work"  begin
     @test type_1_errors === false_positives
     @test type_2_errors === false_negatives
-    @test accuracy === accuracy_score
-    @test precision_score === positive_predictive_value
+    @test precision === positive_predictive_value
     @test sensitivity === true_positive_rate
     @test recall === true_positive_rate
     @test specificity === true_negative_rate
-end
-
-@testset "internal unit tests" begin
-    @test MLMetrics.is_positive(1)
-    @test MLMetrics.is_positive(1.0)
-    @test !MLMetrics.is_positive(0)
-    @test !MLMetrics.is_positive(0.)
-    @test !MLMetrics.is_positive(-1)
-    @test !MLMetrics.is_positive(-1.0)
-    @test MLMetrics.is_positive(true)
-    @test !MLMetrics.is_positive(false)
-    @test_throws ArgumentError MLMetrics.is_positive("a")
-    @test MLMetrics.is_positive("a", Binary("a"))
-    @test !MLMetrics.is_positive("a", Binary("b"))
-    @test !MLMetrics.is_negative(1)
-    @test !MLMetrics.is_negative(1.0)
-    @test MLMetrics.is_negative(0)
-    @test MLMetrics.is_negative(0.)
-    @test MLMetrics.is_negative(-1)
-    @test MLMetrics.is_negative(-1.0)
-    @test !MLMetrics.is_negative(true)
-    @test MLMetrics.is_negative(false)
-    @test_throws ArgumentError MLMetrics.is_negative("a")
-    @test !MLMetrics.is_negative("a", Binary("a"))
-    @test MLMetrics.is_negative("a", Binary("b"))
 end
 
 y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
@@ -108,7 +84,7 @@ end
     @test accuracy([:a,:b,:b,:c], [:c,:b,:a,:a]) === .25
 end
 =#
-_accuracy_score_nonorm(t,o,m) = accuracy_score(t,o,m, normalize=false)
+_accuracy_nonorm(t,o,m) = accuracy(t,o,m, normalize=false)
 for (fun, ref) = ((true_positives,  5),
                   (true_negatives,  4),
                   (false_positives, 3),
@@ -118,8 +94,8 @@ for (fun, ref) = ((true_positives,  5),
                   (condition_negative, 7),
                   (predicted_condition_positive, 8),
                   (predicted_condition_negative, 9),
-                  (accuracy_score,  9/17),
-                  (_accuracy_score_nonorm, 9.),
+                  (accuracy,  9/17),
+                  (_accuracy_nonorm, 9.),
                   (positive_predictive_value, 5/8),
                   (false_discovery_rate, 3/8),
                   (negative_predictive_value, 4/9),

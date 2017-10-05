@@ -1,9 +1,16 @@
 module MLMetrics
 
+using LearnBase
+using MLLabelUtils
+using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
+using LossFunctions
+using LossFunctions: AverageMode, @_dimcheck
+import Base.precision
+
 export
 
-    CompareMode,
-    AverageMode,
+    AvgMode,
+    LabelEnc,
 
     absolute_error,
     percent_error,
@@ -39,11 +46,9 @@ export
     condition_negative,
     predicted_condition_positive,
     predicted_condition_negative,
-    accuracy_score,
     accuracy,
     prevalence,
     positive_predictive_value,
-    precision_score,
     false_discovery_rate,
     negative_predictive_value,
     false_omission_rate,
@@ -60,17 +65,7 @@ export
     f1_score,
     matthews_corrcoef
 
-
-include("common.jl")
-include("averagemode.jl")
 include("classification/comparemode.jl")
-
-#using MLMetrics.AverageMode
-using MLMetrics.AverageMode.AvgMode
-
-using MLMetrics.CompareMode
-using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass
-
 include("classification/binary.jl")
 include("classification/multiclass.jl")
 include("regression.jl")
