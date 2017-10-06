@@ -1,10 +1,10 @@
-_ambiguous() = throw(ArgumentError("Can't infer the comparison mode because argument types are ambigous. Please specify the desired CompareMode manually."))
+_ambiguous() = throw(ArgumentError("Can't infer the label encoding because argument types/values are ambigous. Please specify the desired LabelEnc manually."))
 
 """
-    comparemode(target, output)
+    comparemode(targets, outputs)
 
 Trys to automatically infer the compare mode for the given
-structure and values in `target` and `output`.
+structure and values in `targets` and `outputs`.
 """
 comparemode(target, output) = _ambiguous()
 
@@ -28,9 +28,9 @@ for _T2 in (:Bool, :Real, :Any)
     end
 end
 
-# Not enough information available to decide for binary,
+# Not enough information available to decide for fuzzy binary,
 # because we don't want to infer an arbitrary label as positive.
-# In this case we decide for MultiClass.
+# In this case we decide to let labelenc decide.
 function comparemode(target::AbstractVector, output::AbstractArray)
     labels = sort(union(target, output))
     labelenc(labels)

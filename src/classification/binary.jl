@@ -1,5 +1,5 @@
-const pos_examples = "Positive examples: `1`, `2.0`, `true`, `0.5`, `:2`."
-const neg_examples = "Negative examples: `0`, `-1`, `0.0`, `-0.5`, `false`, `:0`."
+const pos_examples = "Positive examples: `1`, `2.0`, `true`, `0.5`."
+const neg_examples = "Negative examples: `0`, `-1`, `0.0`, `-0.5`, `false`."
 
 """
     true_positives(target, output, ::LabelEnc.FuzzyBinary) -> Int
@@ -9,13 +9,13 @@ positive on their own. They are not compared to each other.
 Returns `0` otherwise.
 $pos_examples
 
-    true_positives(target, output, le::BinaryLabelEncoding) -> Int
+    true_positives(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if both, `target` and `output` are considered
-positive labels according to `le`. Returns `0` otherwise.
+positive labels according to `encoding`. Returns `0` otherwise.
 """
-true_positives(target, output, le::BinaryLabelEncoding) =
-    Int(isposlabel(target, le) & isposlabel(output, le))
+true_positives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding) & isposlabel(output, encoding))
 
 # --------------------------------------------------------------------
 
@@ -27,13 +27,13 @@ negative on their own. They are not compared to each other.
 Returns `0` otherwise.
 $neg_examples
 
-    true_negatives(target, output, le::BinaryLabelEncoding) -> Int
+    true_negatives(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if both, `target` and `output` are considered
-negative labels according to `le`. Returns `0` otherwise.
+negative labels according to `encoding`. Returns `0` otherwise.
 """
-true_negatives(target, output, le::BinaryLabelEncoding) =
-    Int(isneglabel(target, le) & isneglabel(output, le))
+true_negatives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding) & isneglabel(output, encoding))
 
 # --------------------------------------------------------------------
 
@@ -46,14 +46,14 @@ Returns `0` otherwise.
 $pos_examples
 $neg_examples
 
-    false_positives(target, output, le::BinaryLabelEncoding) -> Int
+    false_positives(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `target` is considered a negative label and
-`output` is considered a positive label (according to `le`).
+`output` is considered a positive label (according to `encoding`).
 Returns `0` otherwise.
 """
-false_positives(target, output, le::BinaryLabelEncoding) =
-    Int(isneglabel(target, le) & isposlabel(output, le))
+false_positives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding) & isposlabel(output, encoding))
 
 type_1_errors = false_positives
 
@@ -68,14 +68,14 @@ Returns `0` otherwise.
 $pos_examples
 $neg_examples
 
-    false_negatives(target, output, le::BinaryLabelEncoding) -> Int
+    false_negatives(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `target` is considered a positive label and
-`output` is considered a negative label (according to `le`).
+`output` is considered a negative label (according to `encoding`).
 Returns `0` otherwise.
 """
-false_negatives(target, output, le::BinaryLabelEncoding) =
-    Int(isposlabel(target, le) & isneglabel(output, le))
+false_negatives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding) & isneglabel(output, encoding))
 
 type_2_errors = false_negatives
 
@@ -88,22 +88,22 @@ Returns `1` if `target` is considered strictly positive.
 Returns `0` otherwise.
 $pos_examples
 
-    condition_positive(target, output, le::BinaryLabelEncoding) -> Int
+    condition_positive(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `target` is considered a positive label according
-to `le`. Returns `0` otherwise.
+to `encoding`. Returns `0` otherwise.
 """
-condition_positive(target, output, le::BinaryLabelEncoding) =
-    Int(isposlabel(target, le))
+condition_positive(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding))
 
 """
-    prevalence(target, output, le::BinaryLabelEncoding) -> Float64
+    prevalence(targets, outputs, [encoding]) -> Float64
 
-Returns the fraction of positive observations in `target`.
-What constitudes as positive depends on `le`.
+Returns the fraction of positive observations in `targets`.
+What constitudes as positive depends on `encoding`.
 """
-prevalence(target, output, le::BinaryLabelEncoding) =
-    condition_positive(target, output, le) / length(target)
+prevalence(target, output, encoding::BinaryLabelEncoding) =
+    condition_positive(target, output, encoding) / length(target)
 
 # --------------------------------------------------------------------
 
@@ -114,13 +114,13 @@ Returns `1` if `target` is considered zero or negative.
 Returns `0` otherwise.
 $neg_examples
 
-    condition_negative(target, output, le::BinaryLabelEncoding) -> Int
+    condition_negative(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `target` is considered a negative label according
-to `le`. Returns `0` otherwise.
+to `encoding`. Returns `0` otherwise.
 """
-condition_negative(target, output, le::BinaryLabelEncoding) =
-    Int(isneglabel(target, le))
+condition_negative(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding))
 
 # --------------------------------------------------------------------
 
@@ -131,13 +131,13 @@ Returns `1` if `output` is considered strictly positive.
 Returns `0` otherwise.
 $pos_examples
 
-    predicted_condition_positive(target, output, le::BinaryLabelEncoding) -> Int
+    predicted_condition_positive(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `output` is considered a positive label according
-to `le`. Returns `0` otherwise.
+to `encoding`. Returns `0` otherwise.
 """
-predicted_condition_positive(target, output, le::BinaryLabelEncoding) =
-    Int(isposlabel(output, le))
+predicted_condition_positive(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(output, encoding))
 
 # --------------------------------------------------------------------
 
@@ -148,13 +148,13 @@ Returns `1` if `output` is considered zero or negative.
 Returns `0` otherwise.
 $neg_examples
 
-    predicted_condition_negative(target, output, le::BinaryLabelEncoding) -> Int
+    predicted_condition_negative(target, output, encoding::BinaryLabelEncoding) -> Int
 
 Returns `1` if `output` is considered a negative label according
-to `le`. Returns `0` otherwise.
+to `encoding`. Returns `0` otherwise.
 """
-predicted_condition_negative(target, output, le::BinaryLabelEncoding) =
-    Int(isneglabel(output, le))
+predicted_condition_negative(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(output, encoding))
 
 # --------------------------------------------------------------------
 # Generate common fallback functions
@@ -165,17 +165,17 @@ for fun in (:true_positives,  :true_negatives,
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
 
-    # Generic fallback. Tries to infer compare mode
-    @eval begin
-        @doc """
-            $($fun_name)(target, output)
+    # Convenience syntax for using native labels
+    @eval function ($fun)(targets::AbstractVector, outputs::AbstractArray, encoding::AbstractVector)
+        length(encoding) == 2 || throw(ArgumentError("The given values in \"encoding\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
+        ($fun)(targets, outputs, LabelEnc.NativeLabels(encoding))
+    end
 
-        If either `target` or `output` is of (el)type `Bool`
-        then `FuzzyBinary` is inferred as compare mode to compute
-        the **$($fun_desc)**. Any other type combination is
-        ambiguous and will result in an error.
-        """ ->
-        ($fun)(target, output) = ($fun)(target, output, comparemode(target,output))
+    # Generic fallback. Tries to infer label encoding
+    @eval function ($fun)(targets, outputs)
+        encoding = comparemode(targets, outputs)
+        nlabel(encoding) == 2 || throw(ArgumentError("The given values in \"targets\" and/or \"outputs\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
+        ($fun)(targets, outputs, encoding)
     end
 
     # prealence is a special case that only needs the fallback
@@ -183,21 +183,21 @@ for fun in (:true_positives,  :true_negatives,
 
     # BinaryLabelEncoding: Generate shared accumulator
     @eval @doc """
-        $($fun_name)(target::AbstractVector, output::AbstractArray, le::BinaryLabelEncoding)
+        $($fun_name)(targets::AbstractVector, outputs::AbstractArray, [encoding]) -> Int
 
-    Counts the total number of **$($fun_desc)** in `output` by
+    Counts the total number of **$($fun_desc)** in `outputs` by
     comparing each element against the corresponding value in
-    `target` according to `le`. Both parameters are expected to
-    be vectors, but `output` is allowed to be a row-vector (or
-    row matrix).
+    `targets` according to `encoding`. Both parameters are
+    expected to be vectors, but `outputs` is allowed to be a
+    row-vector (or row-matrix).
     """ $fun
     @eval function ($fun)(target::AbstractVector,
                           output::AbstractArray,
-                          compare::BinaryLabelEncoding)
+                          encoding::BinaryLabelEncoding)
         @_dimcheck length(target) == length(output)
         result = 0
         @inbounds for i = 1:length(target)
-            result += ($fun)(target[i], output[i], compare)
+            result += ($fun)(target[i], output[i], encoding)
         end
         result
     end
