@@ -5,7 +5,6 @@ using MLLabelUtils
 using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
 using LossFunctions
 using LossFunctions: AverageMode, @_dimcheck
-import Base.precision
 
 export
 
@@ -24,7 +23,7 @@ export
     predicted_condition_negative,
 
     # multiclass support
-    positive_predictive_value, # precision,
+    positive_predictive_value, precision_score,
     negative_predictive_value,
     false_discovery_rate,
     false_omission_rate,
@@ -64,7 +63,8 @@ export
     diagnostic_odds_ratio,
     matthews_corrcoef
 
-include("classification/comparemode.jl")
+include("upstream.jl")
+include("classification/utils.jl")
 include("classification/binary.jl")
 include("classification/multiclass.jl")
 include("regression.jl")

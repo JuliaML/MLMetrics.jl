@@ -3,7 +3,7 @@ using MLLabelUtils.LabelEnc.FuzzyBinary
 @testset "test that synonyms work"  begin
     @test type_1_errors === false_positives
     @test type_2_errors === false_negatives
-    @test precision === positive_predictive_value
+    @test precision_score === positive_predictive_value
     @test sensitivity === true_positive_rate
     @test recall === true_positive_rate
     @test specificity === true_negative_rate

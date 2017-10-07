@@ -1,3 +1,13 @@
+const ENCODING_DESCR = """
+    The optional parameter `encoding` serves as specifcation of
+    what labels exist and what they denote (e.g. what constitutes
+    as positive or negative). It can either be an object from the
+    namespace `LabelEnc`, or a vector of labels. If omitted, the
+    appropriate `encoding` will be inferred from the types and/or
+    values of `targets` and `outputs`. In general this will be
+    slower than specifying the parameter explicitly.
+    """
+
 _ambiguous() = throw(ArgumentError("Can't infer the label encoding because argument types/values are ambigous. Please specify the desired LabelEnc manually."))
 
 """
@@ -32,6 +42,5 @@ end
 # because we don't want to infer an arbitrary label as positive.
 # In this case we decide to let labelenc decide.
 function comparemode(target::AbstractVector, output::AbstractArray)
-    labels = sort(union(target, output))
-    labelenc(labels)
+    labelenc(vcat(target, vec(output)))
 end
