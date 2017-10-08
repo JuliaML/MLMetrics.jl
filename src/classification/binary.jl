@@ -1,7 +1,7 @@
 """
     true_positives(target, output, [encoding]) -> Int
 
-Returns `1` if both, `target` and `output` are considered
+Returns `1` if both, `target` and `output`, are considered
 positive labels according to `encoding`. Returns `0` otherwise.
 """
 true_positives(target, output, encoding::BinaryLabelEncoding) =
@@ -12,7 +12,7 @@ true_positives(target, output, encoding::BinaryLabelEncoding) =
 """
     true_negatives(target, output, [encoding]) -> Int
 
-Returns `1` if both, `target` and `output` are considered
+Returns `1` if both, `target` and `output`, are considered
 negative labels according to `encoding`. Returns `0` otherwise.
 """
 true_negatives(target, output, encoding::BinaryLabelEncoding) =
@@ -130,7 +130,7 @@ for fun in (:true_positives,  :true_negatives,
 
     Counts the total number of **$($fun_desc)** in `outputs` by
     comparing each element against the corresponding value in
-    `targets` according to `encoding`. Both parameters are
+    `targets` (according to `encoding`). Both parameters are
     expected to be vectors of some form, which means they are
     allowed to be row-vectors (or row-matrices).
 

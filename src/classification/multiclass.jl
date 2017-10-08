@@ -99,6 +99,8 @@ macro cmetric(all)
             encoding = comparemode(targets, outputs)
             ($fun)(targets, outputs, encoding, avgmode)
         end
+
+        #  same as above but kw version which is more tolerant
         function ($fun)(targets::AbstractVector,
                         outputs::AbstractArray;
                         avgmode = AvgMode.None())
@@ -108,7 +110,7 @@ macro cmetric(all)
 
         # add documentation to function
         @eval @doc """
-            $($fun)(targets, outputs, [encoding], [avgmode])
+            $($(string(fun)))(targets, outputs, [encoding], [avgmode])
 
         $($docstr)
         """ ($fun)
@@ -119,8 +121,8 @@ end
 
 @cmetric """
 Returns the fraction of positive predicted outcomes in `outputs`
-that are true positives according to `targets`. This is also
-known as precision (see `precision_score`).
+that are true positives according to the correspondig `targets`.
+This is also known as "precision" (alias `precision_score`).
 
 ```jldoctest
 julia> precision_score([0,1,1,0,1], [1,1,1,0,1])
@@ -137,53 +139,183 @@ julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:c
 0.6666666666666666
 ```
 
-TODO: avgmode
+$AVGMODE_DESCR
 
 ```jldoctest
-julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=AvgMode.None()
-([1.0, 0.0, 0.666667], Symbol[:a, :b, :c])
+julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 1.0
+  :b => 0.0
+  :c => 0.666667
 
-julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=AvgMode.Micro())
+julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
 0.6
 
-julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=AvgMode.Macro())
+julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
 0.5555555555555555
 ```
 """ ->
-precision_score := true_positives / predicted_condition_positive
+positive_predictive_value := true_positives / predicted_condition_positive
 
-const positive_predictive_value = precision_score
+const precision_score = positive_predictive_value
 
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of negative predicted outcomes that
-are true negatives (as Float64).
+Returns the fraction of negative predicted outcomes in `outputs`
+that are true negatives according to the corresponding `targets`.
+
+```jldoctest
+julia> negative_predictive_value([0,1,1,0,1], [1,1,1,0,1])
+1.0
+
+julia> negative_predictive_value([-1,1,1,-1,1], [1,1,1,-1,1])
+1.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> negative_predictive_value([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:b))
+0.75
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> negative_predictive_value([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.75
+  :b => 0.75
+  :c => 1.0
+
+julia> negative_predictive_value([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.8
+
+julia> negative_predictive_value([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.8333333333333334
+```
 """ ->
 negative_predictive_value := true_negatives / predicted_condition_negative
 
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of positive predicted outcomes that
-are false positives (as Float64).
+Returns the fraction of positive predicted outcomes in `outputs`
+that are false positives according to the corresponding
+`targets`.
+
+```jldoctest
+julia> false_discovery_rate([0,1,1,0,1], [1,1,1,0,1])
+0.25
+
+julia> false_discovery_rate([-1,1,1,-1,1], [1,1,1,-1,1])
+0.25
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> false_discovery_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:b))
+1.0
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> false_discovery_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.0
+  :b => 1.0
+  :c => 0.333333
+
+julia> false_discovery_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.4
+
+julia> false_discovery_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.4444444444444444
+```
 """ ->
 false_discovery_rate := false_positives / predicted_condition_positive
 
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of negative predicted outcomes that
-are false negatives (as Float64).
+Returns the fraction of negative predicted outcomes in `outputs`
+that are false negatives according to the corresponding
+`targets`.
+
+```jldoctest
+julia> false_omission_rate([0,1,1,0,1], [1,1,1,0,1])
+0.0
+
+julia> false_omission_rate([-1,1,1,-1,1], [1,1,1,-1,1])
+0.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> false_omission_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:b))
+0.25
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> false_omission_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.25
+  :b => 0.25
+  :c => 0.0
+
+julia> false_omission_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.2
+
+julia> false_omission_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.16666666666666666
+```
 """ ->
 false_omission_rate := false_negatives / predicted_condition_negative
 
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of truely positive observations that were
-predicted as positives (as Float64). This is also known as
-`recall` or `sensitivity`.
+Returns the fraction of truly positive observations in `outputs`
+that were predicted as positives. What constitutes "truly
+positive" depends on to the corresponding `targets`. This is also
+known as `recall` or `sensitivity`.
+
+```jldoctest
+julia> recall([0,1,1,0,1], [1,1,1,0,1])
+1.0
+
+julia> recall([-1,1,1,-1,1], [1,1,1,-1,1])
+1.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> recall([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:a))
+0.5
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> recall([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.5
+  :b => 0.0
+  :c => 1.0
+
+julia> recall([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.6
+
+julia> recall([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.5
+```
 """ ->
 true_positive_rate := true_positives / condition_positive
 
@@ -193,16 +325,80 @@ const recall = true_positive_rate
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of truely negative observations that
-were (wrongly) predicted as positives (as Float64).
+Returns the fraction of truly negative observations in `outputs`
+that were (wrongly) predicted as positives. What constitutes
+"truly negative" depends on to the corresponding `targets`.
+
+```jldoctest
+julia> false_positive_rate([0,1,1,0,1], [1,1,1,0,1])
+0.5
+
+julia> false_positive_rate([-1,1,1,-1,1], [1,1,1,-1,1])
+0.5
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> false_positive_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:b))
+0.25
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> false_positive_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.0
+  :b => 0.25
+  :c => 0.333333
+
+julia> false_positive_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.2
+
+julia> false_positive_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.19444444444444442
+```
 """ ->
 false_positive_rate := false_positives / condition_negative
 
 # --------------------------------------------------------------------
 
 @cmetric """
-Returns the fraction of truely positive observations that
-were (wrongly) predicted as negative (as Float64).
+Returns the fraction of truely positive observations that were
+(wrongly) predicted as negative. What constitutes "truly
+positive" depends on to the corresponding `targets`.
+
+```jldoctest
+julia> false_negative_rate([0,1,1,0,1], [1,1,1,0,1])
+0.0
+
+julia> false_negative_rate([-1,1,1,-1,1], [1,1,1,-1,1])
+0.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> false_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:a))
+0.5
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> false_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.5
+  :b => 1.0
+  :c => 0.0
+
+julia> false_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.4
+
+julia> false_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.5
+```
 """ ->
 false_negative_rate := false_negatives / condition_positive
 
@@ -210,7 +406,39 @@ false_negative_rate := false_negatives / condition_positive
 
 @cmetric """
 Returns the fraction of negative predicted outcomes that are true
-negatives (as Float64). This is also known as `specificity`.
+negatives according to the corresponding `targets`. This is also
+known as `specificity`.
+
+```jldoctest
+julia> true_negative_rate([0,1,1,0,1], [1,1,1,0,1])
+0.5
+
+julia> true_negative_rate([-1,1,1,-1,1], [1,1,1,-1,1])
+0.5
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> true_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:b))
+0.75
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> true_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 1.0
+  :b => 0.75
+  :c => 0.666667
+
+julia> true_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.8
+
+julia> true_negative_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.8055555555555555
+```
 """ ->
 true_negative_rate := true_negatives / condition_negative
 
