@@ -1,125 +1,7 @@
 # Binary and Multiclass
-
-# --------------------------------------------------------------------
-# LabelEncoding aggregate logic
-
-_aggregate(numerator, denominator, labels, avgmode) =
-    throw(ArgumentError("$avgmode is not supported"))
-
-_aggregate(numerator, denominator, labels, ::AvgMode.None) =
-    Dict(Pair.(labels, numerator ./ denominator))
-
-_aggregate(numerator, denominator, labels, ::AvgMode.Macro) =
-    mean(numerator ./ denominator)
-
-_aggregate(numerator, denominator, labels, ::AvgMode.Micro) =
-    sum(numerator) / sum(denominator)
-
-# TODO: add weighted versions
-
 # --------------------------------------------------------------------
 
-"""
-This will allow for readable function definition such as
-
-    @cmetric "..." -> precision := true_positives / predicted_condition_positive
-
-with the added bonus of the functions being implemented in such
-a way as to avoid memory allocation and being able to compute
-their results in just one pass.
-"""
-macro cmetric(all)
-    @assert all.head == :->
-    docstr = all.args[1]
-    expr = all.args[2].args[2]
-    @assert expr.head == :(:=)
-    fun = expr.args[1]
-    @assert expr.args[2].args[1] == :/
-    numer_fun = expr.args[2].args[2]
-    denom_fun = expr.args[2].args[3]
-    esc(quote
-
-        # explicit binary case
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray,
-                        encoding::BinaryLabelEncoding,
-                        avgmode::AverageMode)
-            @_dimcheck length(targets) == length(outputs)
-            numer = 0; denom = 0
-            @inbounds for I in eachindex(targets, outputs)
-                target = targets[I]
-                output = outputs[I]
-                numer += ($numer_fun)(target, output, encoding)
-                denom += ($denom_fun)(target, output, encoding)
-            end
-            (numer / denom)::Float64
-        end
-
-        # multiclass case. The function _aggregate dispatches on the mode
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray,
-                        encoding::LabelEncoding,
-                        avgmode::AverageMode)
-            @_dimcheck length(targets) == length(outputs)
-            labels = label(encoding)
-            n = length(labels)
-            numer = zeros(n); denom = zeros(n)
-            ovr = [LabelEnc.OneVsRest(l) for l in labels]
-            @inbounds for i = 1:length(targets)
-                target = targets[i]
-                output = outputs[i]
-                for j = 1:n
-                    numer[j] += ($numer_fun)(target, output, ovr[j])
-                    denom[j] += ($denom_fun)(target, output, ovr[j])
-                end
-            end
-            _aggregate(numer, denom, labels, avgmode)
-        end
-
-        # fallback for native labels as plain vector
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray,
-                        encoding::AbstractVector,
-                        avgmode::AverageMode)
-            ($fun)(targets, outputs, LabelEnc.NativeLabels(encoding), convert(AverageMode, avgmode))
-        end
-
-        # fallback for multiclass case to dispatch on average mode
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray,
-                        encoding;
-                        avgmode = AvgMode.None())
-            ($fun)(targets, outputs, encoding, convert(AverageMode, avgmode))
-        end
-
-        # fallbacks to try and choose compare mode automatically
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray,
-                        avgmode::AverageMode)
-            encoding = comparemode(targets, outputs)
-            ($fun)(targets, outputs, encoding, avgmode)
-        end
-
-        #  same as above but kw version which is more tolerant
-        function ($fun)(targets::AbstractVector,
-                        outputs::AbstractArray;
-                        avgmode = AvgMode.None())
-            encoding = comparemode(targets, outputs)
-            ($fun)(targets, outputs, encoding, convert(AverageMode, avgmode))
-        end
-
-        # add documentation to function
-        @eval @doc """
-            $($(string(fun)))(targets, outputs, [encoding], [avgmode])
-
-        $($docstr)
-        """ ($fun)
-    end)
-end
-
-# --------------------------------------------------------------------
-
-@cmetric """
+@reduce_fraction """
 Returns the fraction of positive predicted outcomes in `outputs`
 that are true positives according to the correspondig `targets`.
 This is also known as "precision" (alias `precision_score`).
@@ -161,7 +43,7 @@ const precision_score = positive_predictive_value
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of negative predicted outcomes in `outputs`
 that are true negatives according to the corresponding `targets`.
 
@@ -200,7 +82,7 @@ negative_predictive_value := true_negatives / predicted_condition_negative
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of positive predicted outcomes in `outputs`
 that are false positives according to the corresponding
 `targets`.
@@ -240,7 +122,7 @@ false_discovery_rate := false_positives / predicted_condition_positive
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of negative predicted outcomes in `outputs`
 that are false negatives according to the corresponding
 `targets`.
@@ -280,7 +162,7 @@ false_omission_rate := false_negatives / predicted_condition_negative
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of truly positive observations in `outputs`
 that were predicted as positives. What constitutes "truly
 positive" depends on to the corresponding `targets`. This is also
@@ -324,7 +206,7 @@ const recall = true_positive_rate
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of truly negative observations in `outputs`
 that were (wrongly) predicted as positives. What constitutes
 "truly negative" depends on to the corresponding `targets`.
@@ -364,7 +246,7 @@ false_positive_rate := false_positives / condition_negative
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of truely positive observations that were
 (wrongly) predicted as negative. What constitutes "truly
 positive" depends on to the corresponding `targets`.
@@ -404,7 +286,7 @@ false_negative_rate := false_negatives / condition_positive
 
 # --------------------------------------------------------------------
 
-@cmetric """
+@reduce_fraction """
 Returns the fraction of negative predicted outcomes that are true
 negatives according to the corresponding `targets`. This is also
 known as `specificity`.
@@ -498,10 +380,15 @@ end
 
 # --------------------------------------------------------------------
 
+"""
+    f_score(target, output, [encoding], [β = 1])
+
+TODO
+"""
 function f_score(targets::AbstractVector,
                  outputs::AbstractArray,
                  encoding::BinaryLabelEncoding,
-                 β::Float64 = 1.0)
+                 β::Number = 1.0)
     @_dimcheck length(targets) == length(outputs)
     β² = abs2(β)
     tp = 0; fp = 0; fn = 0
@@ -515,7 +402,14 @@ function f_score(targets::AbstractVector,
     (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
 end
 
+f_score(target, output, β::Number = 1.0) =
+    f_score(target, output, comparemode(targets, outputs), β)
 
+"""
+    f1_score(target, output, [encoding])
+
+TODO
+"""
 f1_score(target, output) = f_score(target, output, 1.0)
 f1_score(target, output, enc) = f_score(target, output, enc, 1.0)
 

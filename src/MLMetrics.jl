@@ -67,6 +67,7 @@ export
 include("upstream.jl")
 include("classification/utils.jl")
 include("classification/binary.jl")
+include("classification/fraction.jl")
 include("classification/multiclass.jl")
 include("regression.jl")
 
