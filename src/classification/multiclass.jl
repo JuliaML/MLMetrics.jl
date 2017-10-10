@@ -329,11 +329,27 @@ const specificity = true_negative_rate
 # --------------------------------------------------------------------
 
 """
-    accuracy(target, output, encoding::BinaryLabelEncoding; normalize = true)
+    accuracy(target, output, [encoding]; [normalize = true]) -> Float64
 
-If `normalize` is `true`, the fraction of correctly classified
-observations is returned (according to `encoding`). Otherwise the
-total number is returned.
+Compute the classification accuracy for the `outputs` given the
+`targets`. If `normalize` is `true`, the fraction of correctly
+classified observations in `outputs` is returned (according to
+`encoding`). Otherwise the total number is returned.
+
+```jldoctest
+julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c])
+0.6
+
+julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], normalize=false)
+3.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> accuracy([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
+0.8
+```
 """
 function accuracy(targets::AbstractVector,
                   outputs::AbstractArray,
@@ -351,39 +367,70 @@ function accuracy(targets::AbstractVector,
     normalize ? Float64(correct/length(targets)) : Float64(correct)
 end
 
-"""
-    accuracy(target, output; normalize = true)
-
-If `normalize` is `true`, the fraction of matching elements in
-`target` and `output` are returned. Otherwise the total number
-of matching elements are returned.
-"""
-function accuracy(target::AbstractVector,
-                  output::AbstractArray,
-                  encoding;
+function accuracy(targets::AbstractVector,
+                  outputs::AbstractArray,
+                  encoding::LabelEncoding;
                   normalize = true)
-    @_dimcheck length(target) == length(output)
+    @_dimcheck length(targets) == length(outputs)
     correct = 0
-    @inbounds for i = 1:length(target)
-        correct += target[i] == output[i]
+    @inbounds for i = 1:length(targets)
+        correct += targets[i] == outputs[i]
     end
-    normalize ? Float64(correct/length(target)) : Float64(correct)
+    normalize ? Float64(correct/length(targets)) : Float64(correct)
 end
 
-# Fall back to "nothing", because labels don't matter
-# to determine element-wise equality
-function accuracy(target::AbstractVector,
-                  output::AbstractArray;
+function accuracy(targets::AbstractVector,
+                  outputs::AbstractArray,
+                  labels::AbstractVector;
                   normalize = true)
-    accuracy(target, output, nothing, normalize = normalize)::Float64
+    accuracy(targets, outputs, LabelEnc.NativeLabels(labels), normalize = normalize)::Float64
+end
+
+function accuracy(targets::AbstractVector,
+                  outputs::AbstractArray;
+                  normalize = true)
+    accuracy(targets, outputs, comparemode(targets, outputs), normalize = normalize)::Float64
 end
 
 # --------------------------------------------------------------------
 
 """
-    f_score(target, output, [encoding], [β = 1])
+    f_score(targets, outputs, [encoding], [β = 1]) -> Float64
 
-TODO
+Compute the F-score for the `outputs` given the `targets`.
+The F-score is a measure for accessing the quality of binary
+predictor by considering both *recall* and the *precision*.
+
+```jldoctest
+julia> recall([1,0,0,1,1], [1,0,0,0,1])
+0.6666666666666666
+
+julia> precision_score([1,0,0,1,1], [1,0,0,0,1])
+1.0
+
+julia> f_score([1,0,0,1,1], [1,0,0,0,1])
+0.8
+```
+
+The parameter `β` can be used to balance the importance of recall
+vs precision. The default `β = 1` corresponds to the harmonic
+mean. A value of `β > 1` weighs recall higher than precision,
+while a value of `β < 1` weighs recall lower than precision.
+
+```jldoctest
+julia> f_score([1,0,0,1,1], [1,0,0,0,1], 2)
+0.7142857142857143
+
+julia> f_score([1,0,0,1,1], [1,0,0,0,1], 0.5)
+0.9090909090909091
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> f_score([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
+0.8
+```
 """
 function f_score(targets::AbstractVector,
                  outputs::AbstractArray,
@@ -402,13 +449,16 @@ function f_score(targets::AbstractVector,
     (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
 end
 
-f_score(target, output, β::Number = 1.0) =
-    f_score(target, output, comparemode(targets, outputs), β)
+f_score(targets, outputs, labels::AbstractVector, args...) =
+    f_score(targets, outputs, LabelEnc.NativeLabels(labels), args...)
+
+f_score(targets, outputs, β::Number = 1.0) =
+    f_score(targets, outputs, comaremode(targets, outputs), β)
 
 """
-    f1_score(target, output, [encoding])
+    f1_score(target, output, [encoding]) -> Float64
 
-TODO
+Same as [`f_score`](@ref), but with `β` fixed to 1.
 """
 f1_score(target, output) = f_score(target, output, 1.0)
 f1_score(target, output, enc) = f_score(target, output, enc, 1.0)

@@ -5,7 +5,7 @@ const ENCODING_DESCR = """
     object from the namespace `LabelEnc`, or a vector of labels.
     If omitted, the appropriate `encoding` will be inferred from
     the types and/or values of `targets` and `outputs`. In
-    general this will be slower than specifying the parameter
+    general this will be slower than specifying the `encoding`
     explicitly.
     """
 
