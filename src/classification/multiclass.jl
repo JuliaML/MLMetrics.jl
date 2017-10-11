@@ -465,28 +465,133 @@ f1_score(target, output, enc) = f_score(target, output, enc, 1.0)
 
 # --------------------------------------------------------------------
 
-function positive_likelihood_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    tpr = true_positive_rate(target, output)
-    fpr = false_positive_rate(target, output)
-    return(tpr / fpr)
-end
+@map_fraction """
+Compute the positive likelihood ratio for the given `outputs` and
+`targets`. It is a useful meassure for assessing the quality of a
+diagnostic test and is defined as `sensitivity / (1 -
+specificity)`. This can also be written as `true_positive_rate /
+false_positive_rate`.
 
-function negative_likelihood_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    fnr = false_negative_rate(target, output)
-    tnr = true_negative_rate(target, output)
-    return(fnr / tnr)
-end
+```jldoctest
+julia> positive_likelihood_ratio([0,1,1,0,1], [1,1,1,0,1])
+2.0
 
-function diagnostic_odds_ratio(target, output)
-    @_dimcheck length(target) == length(output)
-    plr = positive_likelihood_ratio(target, output)
-    nlr = negative_likelihood_ratio(target, output)
-    return(plr / nlr)
-end
+julia> positive_likelihood_ratio([-1,1,1,-1,1], [1,1,1,-1,1])
+2.0
+```
 
+$ENCODING_DESCR
 
+```jldoctest
+julia> positive_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:c))
+3.0
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> positive_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.0
+  :b => 0.0
+  :c => 3.0
+
+julia> positive_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+1.3333333333333335
+
+julia> positive_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+1.090909090909091
+```
+""" ->
+positive_likelihood_ratio := true_positive_rate / false_positive_rate
+
+# --------------------------------------------------------------------
+
+@map_fraction """
+Compute the negative likelihood ratio for the given `outputs` and
+`targets`. It is a useful meassure for assessing the quality of a
+diagnostic test and is defined as `(1 - sensitivity) /
+specificity`. This can also be written as `false_negative_rate /
+true_negative_rate`.
+
+```jldoctest
+julia> negative_likelihood_ratio([0,1,1,0,1], [1,0,1,0,1])
+0.6666666666666666
+
+julia> negative_likelihood_ratio([-1,1,1,-1,1], [1,-1,1,-1,1])
+0.6666666666666666
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> negative_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:a))
+1.3333333333333333
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> negative_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 1.33333
+  :b => 1.5
+  :c => 0.0
+
+julia> negative_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.8571428571428572
+
+julia> negative_likelihood_ratio([:b,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
+0.9600000000000002
+```
+""" ->
+negative_likelihood_ratio := false_negative_rate / true_negative_rate
+
+# --------------------------------------------------------------------
+
+@map_fraction """
+Compute the diagnostic odds ratio (DOR) for the given `outputs`
+and `targets`. It is a useful meassure of the effectiveness of a
+diagnostic test and is defined as `positive_likelihood_ratio /
+negative_likelihood_ratio`.
+
+```jldoctest
+julia> diagnostic_odds_ratio([0,1,1,0,1], [1,0,1,0,1])
+2.0
+
+julia> diagnostic_odds_ratio([-1,1,1,-1,1], [1,-1,1,-1,1])
+2.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> diagnostic_odds_ratio([:b,:b,:a,:c,:c], [:a,:b,:b,:c,:c], LabelEnc.OneVsRest(:b))
+2.0
+```
+
+$AVGMODE_DESCR
+
+```jldoctest
+julia> diagnostic_odds_ratio([:b,:b,:a,:c,:c], [:a,:b,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.0
+  :b => 2.0
+  :c => Inf
+
+julia> diagnostic_odds_ratio([:b,:b,:a,:c,:c], [:a,:b,:b,:c,:c], avgmode=:micro)
+5.999999999999999
+
+julia> diagnostic_odds_ratio([:b,:b,:a,:c,:c], [:a,:b,:b,:c,:c], avgmode=:macro)
+4.142857142857143
+```
+""" ->
+diagnostic_odds_ratio := positive_likelihood_ratio / negative_likelihood_ratio
+# FIXME: maybe check if both false negatives and false positives are zero
+
+# --------------------------------------------------------------------
+
+# TODO: make this work for AvgMode and LabelEncoding
 function matthews_corrcoef(target, output)
     @_dimcheck length(target) == length(output)
     tp = true_positives(target, output)
