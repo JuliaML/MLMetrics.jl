@@ -1,6 +1,6 @@
 function absolute_error(y_true, y_pred)
     @_dimcheck length(y_true) == length(y_pred)
-    return(abs(y_true .- y_pred))
+    return(abs.(y_true .- y_pred))
 end
 
 function percent_error(y_true, y_pred)
@@ -25,7 +25,7 @@ end
 
 function absolute_percent_error(y_true, y_pred)
     @_dimcheck length(y_true) == length(y_pred)
-    return(abs(percent_error(y_true, y_pred)))
+    return(abs.(percent_error(y_true, y_pred)))
 end
 
 function mean_error(y_true, y_pred)
@@ -85,19 +85,19 @@ end
 
 function symmetric_mean_absolute_percent_error(y_true, y_pred)
     @_dimcheck length(y_true) == length(y_pred)
-    return(mean(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
+    return(mean(abs.(y_pred - y_true) / ((abs.(y_true) + abs.(y_pred)) / 2)))
 end
 
 function symmetric_median_absolute_percent_error(y_true, y_pred)
     @_dimcheck length(y_true) == length(y_pred)
-    return(median(abs(y_pred - y_true) / ((abs(y_true) + abs(y_pred)) / 2)))
+    return(median(abs.(y_pred - y_true) / ((abs.(y_true) + abs.(y_pred)) / 2)))
 end
 
 function mean_absolute_scaled_error(y_true, y_pred)
     @_dimcheck length(y_true) == length(y_pred)
     n = max(length(y_true), length(y_pred))
-    numerator = sum(abs(y_true - y_pred))
-    denominator = (n / (n - 1)) * sum(abs(y_true[2:n] - y_pred[1:(n-1)]))
+    numerator = sum(abs.(y_true - y_pred))
+    denominator = (n / (n - 1)) * sum(abs.(y_true[2:n] - y_pred[1:(n-1)]))
     return(numerator / denominator)
 end
 

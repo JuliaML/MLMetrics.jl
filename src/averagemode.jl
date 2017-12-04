@@ -6,12 +6,12 @@ export
     Micro,
     Weighted
 
-abstract AvgMode
+abstract type AvgMode end
 
-immutable None <: AvgMode end
-immutable Macro <: AvgMode end
-immutable Micro <: AvgMode end
-immutable Weighted <: AvgMode end
+struct None <: AvgMode end
+struct Macro <: AvgMode end
+struct Micro <: AvgMode end
+struct Weighted <: AvgMode end
 
 end
 
