@@ -6,11 +6,11 @@
 @inline is_positive(value) = CompareMode._ambiguous()
 @inline is_positive(value, bc::Binary) = (value == bc.pos_label)
 @inline is_positive(value::Bool) = value
-@inline is_positive{T<:Real}(value::T) = (value > zero(T))
+@inline is_positive(value::T) where {T<:Real} = (value > zero(T))
 
 @inline is_negative(value) = CompareMode._ambiguous()
 @inline is_negative(value, bc::Binary) = (value != bc.pos_label)
-@inline is_negative{T<:Real}(value::T) = (value <= zero(T))
+@inline is_negative(value::T) where {T<:Real} = (value <= zero(T))
 
 # ============================================================
 

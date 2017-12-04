@@ -13,7 +13,7 @@ _ambiguous() = throw(ArgumentError("Can't infer the comparison mode because argu
 
 # ============================================================
 
-abstract AbstractBinary
+abstract type AbstractBinary end
 
 """
     FuzzyBinary()
@@ -27,7 +27,7 @@ Other than that the values are not compared to each other.
 - $pos_examples
 - $neg_examples
 """
-immutable FuzzyBinary <: AbstractBinary end
+struct FuzzyBinary <: AbstractBinary end
 
 
 """
@@ -39,13 +39,13 @@ the positive class. Because the problem is assumed to be binary
 any value that does not match `pos_label` will be assumed to be
 of the negative class.
 """
-immutable Binary{T} <: AbstractBinary
+struct Binary{T} <: AbstractBinary
     pos_label::T
 end
 
 # ============================================================
 
-abstract AbstractMultiClass
+abstract type AbstractMultiClass end
 
 """
     FuzzyMultiClass()
@@ -53,21 +53,21 @@ abstract AbstractMultiClass
 Used internally for multiclass problems that don't require
 knowledge about the labels.
 """
-immutable FuzzyMultiClass <: AbstractMultiClass end
+struct FuzzyMultiClass <: AbstractMultiClass end
 
 """
     MultiClass(labels)
 
 Defines the situation as a multiclass classification problem.
 """
-immutable MultiClass{T,N} <: AbstractMultiClass
+struct MultiClass{T, N} <: AbstractMultiClass
     labels::Vector{T}
-    function MultiClass(labels::Vector{T})
+    function MultiClass{T, N}(labels::Vector{T}) where {T, N}
         @assert length(labels) == length(unique(labels)) == N
         new(labels)
     end
 end
-MultiClass{T}(labels::Vector{T}) =
+MultiClass(labels::Vector{T}) where {T} =
     MultiClass{T,length(labels)}(labels)
 
 # ============================================================
@@ -96,14 +96,14 @@ auto(target, output) = _ambiguous()
 auto(target::AbstractVector{Bool}, output::AbstractArray{Bool}) =
     FuzzyBinary()
 
-# Generate the Bool combinations to avoid ambuguity warnings
+# Generate the Bool combinations to avoid ambiguity warnings
 auto(target::Bool, output::Bool) = FuzzyBinary()
 for _T2 in (:Bool, :Real, :Any)
     @eval begin
-        auto{T2<:$_T2}(target::AbstractVector{T2},
-                       output::AbstractArray{Bool}) = FuzzyBinary()
-        auto{T2<:$_T2}(target::AbstractVector{Bool},
-                       output::AbstractArray{T2}) = FuzzyBinary()
+        auto(target::AbstractVector{T2},
+             output::AbstractArray{Bool}) where {T2<:$_T2} = FuzzyBinary()
+        auto(target::AbstractVector{Bool},
+             output::AbstractArray{T2}) where {T2<:$_T2} = FuzzyBinary()
         auto(target::$_T2, output::Bool) = FuzzyBinary()
         auto(target::Bool, output::$_T2) = FuzzyBinary()
     end
@@ -112,8 +112,8 @@ end
 # For Real numbers we will decide to choose Binary if only
 # two unique label values are found. MultiClass otherwise
 # Unfortunately this function can not be type stable.
-function auto{T1<:Real, T2<:Real}(target::AbstractVector{T1},
-                                  output::AbstractArray{T2})
+function auto(target::AbstractVector{T1},
+              output::AbstractArray{T2}) where {T1<:Real, T2<:Real}
     labels = union(target, output)
     if length(labels) == 2
         Binary(maximum(labels))

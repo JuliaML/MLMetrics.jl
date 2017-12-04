@@ -48,10 +48,10 @@ macro cmetric(all)
         end
 
         # MultiClass case. The function _average dispatches on the mode
-        @noinline function $fun{T}(targets::AbstractVector,
-                                   outputs::AbstractArray,
-                                   mc::MultiClass{T},
-                                   avg::AvgMode)
+        @noinline function $fun(targets::AbstractVector,
+                                outputs::AbstractArray,
+                                mc::MultiClass{T},
+                                avg::AvgMode) where T
             @_dimcheck length(target) == length(output)
             labels = mc.labels
             n = length(labels)
