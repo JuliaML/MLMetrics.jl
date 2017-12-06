@@ -453,7 +453,7 @@ f_score(targets, outputs, labels::AbstractVector, args...) =
     f_score(targets, outputs, LabelEnc.NativeLabels(labels), args...)
 
 f_score(targets, outputs, β::Number = 1.0) =
-    f_score(targets, outputs, comaremode(targets, outputs), β)
+    f_score(targets, outputs, comparemode(targets, outputs), β)
 
 """
     f1_score(target, output, [encoding]) -> Float64
