@@ -75,6 +75,17 @@ for (fun, mask) = ((true_positives,  (0,0,0,1)),
     end
 end
 
+# f_score
+
+y_true = [0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2]
+y_pred = [0, 1, 0, 1, 0, 1, 0, 1, 2, 2, 1]
+@test f_score(y_true, y_pred) == Dict{Int, Float64}(0 => 0.5714285714285715, 1 => 0.6, 2=>0.8)
+@test f_score(y_true, y_pred, AvgMode.Macro()) ≈ 0.6571428571428571
+@test f_score(y_true, y_pred, AvgMode.Micro()) ≈ 0.6363636363636364
+@test f_score(y_true, y_pred, LabelEnc.NativeLabels(unique(y_true)), AvgMode.Micro()) ≈ 0.6363636363636364
+@test f_score(y_true, y_pred, 2.0) == Dict(0=>0.35714285714285715,2=>0.5,1=>0.375)
+@test sort(collect(keys(f_score(y_true, y_pred, [0, 1, 2])))) == [0, 1, 2]
+
 #=
 @testset "multiclass sanity check" begin
     # We count positive strickly positive matches as positives
