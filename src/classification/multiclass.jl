@@ -504,9 +504,9 @@ f_score(targets, outputs, avgmode::AverageMode) =
 Same as [`f_score`](@ref), but with `β` fixed to 1.
 """
 f1_score(targets, outputs) = f_score(targets, outputs, 1.0)
-f1_score(targets, outputs, enc) = f_score(targets, outputs, enc, 1.0)
+f1_score(targets, outputs, enc::LabelEncoding) = f_score(targets, outputs, enc, 1.0)
 f1_score(targets, outputs, avgmode::AverageMode) = f_score(targets, outputs, avgmode)
-f1_score(targets, outputs, enc, avgmode::AverageMode) = f_score(targets, outputs, enc, avgmode, 1.0)
+f1_score(targets, outputs, enc::LabelEncoding, avgmode::AverageMode) = f_score(targets, outputs, enc, avgmode, 1.0)
 
 aggregate_score(score, labels, ::AvgMode.None) = Dict(Pair.(labels, score))
 aggregate_score(score, labels, ::AvgMode.Macro) = mean(score)
