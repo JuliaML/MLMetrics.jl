@@ -52,7 +52,6 @@ macro cmetric(all)
                                    outputs::AbstractArray,
                                    mc::MultiClass{T},
                                    avg::AvgMode)
-            @_dimcheck length(target) == length(output)
             labels = mc.labels
             n = length(labels)
             numer, denom = zeros(n), zeros(n)
@@ -60,6 +59,7 @@ macro cmetric(all)
             @inbounds for i = 1:length(targets)
                 target = targets[i]
                 output = outputs[i]
+                @_dimcheck length(target) == length(output)
                 for j = 1:n
                     numer[j] += $numer_fun(target, output, ovr[j])
                     denom[j] += $denom_fun(target, output, ovr[j])
