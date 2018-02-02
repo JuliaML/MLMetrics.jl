@@ -99,15 +99,19 @@ for (fun, mask) = ((true_positives,  (0,0,0,1)),
     end
 end
 
-#=
+
 @testset "multiclass sanity check" begin
     # We count positive strickly positive matches as positives
-    @test true_positives([1,2,3,4], [1,3,2,4]) === 2
-    @test true_negatives([1,2,3,4], [4,3,2,1]) === 0
+    #@test true_positives([1,2,3,4], [1,3,2,4]) === 2
+    #@test true_negatives([1,2,3,4], [4,3,2,1]) === 0
     @test accuracy([1,2,3,4], [1,3,2,4]) === .5
     @test accuracy([:a,:b,:b,:c], [:c,:b,:a,:a]) === .25
+    
+    @test positive_predictive_value(collect("aabbbc"), collect("aabbac")) == ([2/3, 1.0, 1.0], collect("abc"))
+    @test positive_predictive_value(collect("aabbbc"), collect("aabbac"); average=AverageMode.Macro()) ≈ 8/9
 end
-=#
+
+
 _accuracy_score_nonorm(t,o,m) = accuracy_score(t,o,m, normalize=false)
 for (fun, ref) = ((true_positives,  5),
                   (true_negatives,  4),
