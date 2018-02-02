@@ -109,6 +109,7 @@ end
     
     @test positive_predictive_value(collect("aabbbc"), collect("aabbac")) == ([2/3, 1.0, 1.0], collect("abc"))
     @test positive_predictive_value(collect("aabbbc"), collect("aabbac"); average=AverageMode.Macro()) ≈ 8/9
+    @test positive_predictive_value(collect("aabbbc"), collect("aabbac"); average=AverageMode.Micro()) ≈ 5/6
 end
 
 
