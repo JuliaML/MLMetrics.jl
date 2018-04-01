@@ -367,6 +367,11 @@ function accuracy(targets::AbstractVector,
     normalize ? Float64(correct/length(targets)) : Float64(correct)
 end
 
+function accuracy(object; normalize = true)
+    correct = true_positives(object) + true_negatives(object)
+    normalize ? Float64(correct/nobs(object)) : Float64(correct)
+end
+
 function accuracy(targets::AbstractVector,
                   outputs::AbstractArray,
                   encoding::LabelEncoding;
@@ -449,6 +454,14 @@ function f_score(targets::AbstractVector,
     (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
 end
 
+function f_score(object, β::Number = 1.0)
+    β² = abs2(β)
+    tp = true_positives(object)
+    fp = false_positives(object)
+    fn = false_negatives(object)
+    (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
+end
+
 # Micro averaging multiclass f-score
 function f_score(targets::AbstractVector,
                  outputs::AbstractVector,
@@ -474,7 +487,7 @@ function f_score(targets::AbstractVector,
     precision_ = zeros(n)
     recall_ = zeros(n)
     @inbounds for j = 1:n
-        recall_[j] = true_positive_rate(targets, outputs, ovr[j])       
+        recall_[j] = true_positive_rate(targets, outputs, ovr[j])
         precision_[j] = positive_predictive_value(targets, outputs, ovr[j])
     end
     β² = abs2(β)
@@ -504,6 +517,7 @@ f_score(targets, outputs, avgmode::AverageMode) =
 Same as [`f_score`](@ref), but with `β` fixed to 1.
 """
 f1_score(targets, outputs) = f_score(targets, outputs, 1.0)
+f1_score(object) = f_score(object, 1.0)
 f1_score(targets, outputs, enc::LabelEncoding) = f_score(targets, outputs, enc, 1.0)
 f1_score(targets, outputs, avgmode::AverageMode) = f_score(targets, outputs, avgmode)
 f1_score(targets, outputs, enc::LabelEncoding, avgmode::AverageMode) = f_score(targets, outputs, enc, avgmode, 1.0)

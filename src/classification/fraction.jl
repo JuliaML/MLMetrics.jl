@@ -59,6 +59,9 @@ macro reduce_fraction(all)
             reduce_fraction($numer_fun, $denom_fun,
                             targets, outputs, encoding, avgmode)
 
+        # for objects like BinaryMetricsCache
+        ($fun)(object) = ($numer_fun)(object) / ($denom_fun)(object)
+
         # add documentation to function
         @doc """
             $($(string(fun)))(targets, outputs, [encoding], [avgmode])
@@ -183,6 +186,9 @@ macro map_fraction(all)
         ($fun)(targets, outputs, encoding, avgmode) =
             map_fraction($numer_fun, $denom_fun,
                          targets, outputs, encoding, avgmode)
+
+        # for objects like BinaryMetricsCache
+        ($fun)(object) = ($numer_fun)(object) / ($denom_fun)(object)
 
         # add documentation to function
         @doc """

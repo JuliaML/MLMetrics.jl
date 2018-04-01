@@ -6,6 +6,7 @@ using MLLabelUtils
 using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
 using LossFunctions
 using LossFunctions: AverageMode, @_dimcheck
+using UnicodePlots
 
 export
 
@@ -34,6 +35,14 @@ export
     true_negative_rate, specificity,
     accuracy,
     f_score, f1_score,
+
+    # roc
+    confusions,
+    confusions_as_sensitivity,
+    roc,
+    specificity_at_sensitivity,
+    precision_at_sensitivity,
+    auc, auc_from_rates,
 
     absolute_error,
     percent_error,
@@ -69,6 +78,7 @@ include("classification/utils.jl")
 include("classification/binary.jl")
 include("classification/fraction.jl")
 include("classification/multiclass.jl")
+include("classification/roc.jl")
 include("regression.jl")
 
 end # module MLMetrics
