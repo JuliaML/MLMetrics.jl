@@ -2,6 +2,7 @@ using MLMetrics
 using MLLabelUtils
 using LossFunctions
 using Base.Test
+using ReferenceTests
 
 tests = [
     "classification.jl",

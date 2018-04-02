@@ -8,12 +8,39 @@ end
 BinaryConfusionMatrix() = BinaryConfusionMatrix{Int}(0,0,0,0)
 BinaryConfusionMatrix(a::AbstractArray) = BinaryConfusionMatrix{Int}(a...)
 
-Base.size(c::BinaryConfusionMatrix) = (2,2)
+function Base.:(+)(a::BinaryConfusionMatrix{T},
+                   b::BinaryConfusionMatrix{S}) where {T,S}
+    BinaryConfusionMatrix{promote_type(T,S)}(
+        a.true_positives  + b.true_positives,
+        a.false_positives + b.false_positives,
+        a.false_negatives + b.false_negatives,
+        a.true_negatives  + b.true_negatives,
+    )
+end
+
+Base.size(c::BinaryConfusionMatrix) = (2, 2)
 function Base.getindex(c::BinaryConfusionMatrix, i::Int, j::Int)
     ifelse((i == 1) & (j == 1), c.true_positives,
     ifelse((i == 2) & (j == 1), c.false_positives,
     ifelse((i == 1) & (j == 2), c.false_negatives, c.true_negatives)))
 end
+
+true_positives(c::BinaryConfusionMatrix)  = c.true_positives
+false_positives(c::BinaryConfusionMatrix) = c.false_positives
+true_negatives(c::BinaryConfusionMatrix)  = c.true_negatives
+false_negatives(c::BinaryConfusionMatrix) = c.false_negatives
+condition_positive(c::BinaryConfusionMatrix) =
+    true_positives(c) + false_negatives(c)
+condition_negative(c::BinaryConfusionMatrix) =
+    true_negatives(c) + false_positives(c)
+LearnBase.nobs(c::BinaryConfusionMatrix) =
+    condition_positive(c) + condition_negative(c)
+prevalence(c::BinaryConfusionMatrix) =
+    condition_positive(c) / nobs(c)
+predicted_condition_positive(c::BinaryConfusionMatrix) =
+    true_positives(c) + false_positives(c)
+predicted_condition_negative(c::BinaryConfusionMatrix) =
+    true_negatives(c) + false_negatives(c)
 
 function Base.show(io::IO, ::MIME"text/plain", c::BinaryConfusionMatrix)
     println(io, summary(c), ":")
@@ -23,8 +50,8 @@ function Base.show(io::IO, ::MIME"text/plain", c::BinaryConfusionMatrix)
     tn = string(true_negatives(c))
     len_p = max(maximum(map(length, (tp, fp))), 3)
     len_n = max(maximum(map(length, (fn, tn))), 3)
-    tp = lpad(tp,len_p); fp = lpad(fp,len_p)
-    fn = lpad(fn,len_n); tn = lpad(tn,len_n)
+    tp = lpad(tp, len_p); fp = lpad(fp, len_p)
+    fn = lpad(fn, len_n); tn = lpad(tn, len_n)
     pad = "  "
     println(io, pad, " ", "Predicted")
     println(io, pad, "  ", lpad("+",len_p), "   ", lpad("-",len_n))
@@ -40,33 +67,7 @@ function Base.show(io::IO, ::MIME"text/plain", c::BinaryConfusionMatrix)
     print(io, pad,   "specificity: ", round(specificity(c),4))
 end
 
-function Base.:(+)(a::BinaryConfusionMatrix{T},
-                   b::BinaryConfusionMatrix{S}) where {T,S}
-    O = promote_type(T,S)
-    BinaryConfusionMatrix{O}(
-        a.true_positives + b.true_positives,
-        a.false_positives + b.false_positives,
-        a.false_negatives + b.false_negatives,
-        a.true_negatives + b.true_negatives,
-    )
-end
-
-true_positives(c::BinaryConfusionMatrix) = c.true_positives
-false_positives(c::BinaryConfusionMatrix) = c.false_positives
-true_negatives(c::BinaryConfusionMatrix) = c.true_negatives
-false_negatives(c::BinaryConfusionMatrix) = c.false_negatives
-condition_positive(c::BinaryConfusionMatrix) =
-    true_positives(c) + false_negatives(c)
-condition_negative(c::BinaryConfusionMatrix) =
-    true_negatives(c) + false_positives(c)
-LearnBase.nobs(c::BinaryConfusionMatrix) =
-    condition_positive(c) + condition_negative(c)
-prevalence(c::BinaryConfusionMatrix) =
-    condition_positive(c) / nobs(c)
-predicted_condition_positive(c::BinaryConfusionMatrix) =
-    true_positives(c) + false_positives(c)
-predicted_condition_negative(c::BinaryConfusionMatrix) =
-    true_negatives(c) + false_negatives(c)
+# --------------------------------------------------------------------
 
 function confusions(targets::AbstractArray{T},
                     outputs::AbstractArray,
@@ -109,7 +110,7 @@ function confusions(targets::AbstractArray,
         target = targets[i]
         output = outputs[i]
         for (j, th) in enumerate(thresholds)
-            pred = convertlabel(encoding, classify(outputs[i], th), LabelEnc.ZeroOne())
+            pred = convertlabel(encoding, classify(output, th), LabelEnc.ZeroOne())
             curve[j] += BinaryConfusionMatrix{Int}(
                 true_positives(target, pred, encoding),
                 false_positives(target, pred, encoding),
@@ -150,22 +151,6 @@ Base.@propagate_inbounds function Base.setindex!(r::ROCCurve, v::BinaryConfusion
     r.confusions[I...] = v
 end
 
-function Base.show(io::IO, r::ROCCurve)
-    print(io, length(r), "-element ", typeof(r).name, " (auc: ", round(auc(r),5), ")")
-end
-
-function Base.show(io::IO, ::MIME"text/plain", r::ROCCurve)
-    println(io, summary(r), ":")
-    fpr = false_positive_rate(r)
-    tpr = true_positive_rate(r)
-    p = lineplot(fpr, tpr, height=10, width=21, xlim=[0,1], ylim=[0,1], canvas=DotCanvas)
-    annotate!(p, :r, 1, "auc: $(round(auc_from_rates(fpr, tpr),5))")
-    lineplot!(p, 0, 1, color=:white)
-    xlabel!(p, "FPR")
-    ylabel!(p, "TPR")
-    print(io, string(p)[1:end-6])
-end
-
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
             :condition_positive, :condition_negative, :prevalence,
@@ -182,21 +167,38 @@ end
 
 confusions(r::ROCCurve) = r.confusions
 
-function confusions_as_sensitivity(r::ROCCurve, at::Number)
-    idx = min(findlast(s -> s < at, sensitivity(r)) + 1, length(r))
+function confusions_at_sensitivity(r::ROCCurve, at::Number)
+    @assert 0 <= at <= 1
+    idx = findfirst(s -> s >= at, sensitivity(r))
     r[idx][2]
 end
 
 function specificity_at_sensitivity(r::ROCCurve, at::Number)
-    specificity(confusions_as_sensitivity(r, at))
+    specificity(confusions_at_sensitivity(r, at))
 end
 
 function precision_at_sensitivity(r::ROCCurve, at::Number)
-    precision_score(confusions_as_sensitivity(r, at))
+    precision_score(confusions_at_sensitivity(r, at))
 end
 
 function accuracy_at_sensitivity(r::ROCCurve, at::Number)
-    precision_score(confusions_as_sensitivity(r, at))
+    accuracy(confusions_at_sensitivity(r, at))
+end
+
+function Base.show(io::IO, r::ROCCurve)
+    print(io, length(r), "-element ", typeof(r).name, " (auc: ", round(auc(r),5), ")")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", r::ROCCurve)
+    println(io, summary(r), ":")
+    fpr = false_positive_rate(r)
+    tpr = true_positive_rate(r)
+    p = lineplot(fpr, tpr, height=10, width=21, xlim=[0,1], ylim=[0,1], canvas=DotCanvas)
+    annotate!(p, :r, 1, "auc: $(round(auc_from_rates(fpr, tpr),5))")
+    lineplot!(p, 0, 1, color=:white)
+    xlabel!(p, "FPR")
+    ylabel!(p, "TPR")
+    print(io, string(p)[1:end-6])
 end
 
 # --------------------------------------------------------------------
@@ -224,6 +226,12 @@ function roc(targets::AbstractArray,
              thresholds::Number = 100,
              encoding::BinaryLabelEncoding = labelenc(targets))
     roc(targets, outputs, linspace(1,0,thresholds), encoding)
+end
+
+function roc(targets::AbstractArray,
+             outputs::AbstractArray,
+             encoding::BinaryLabelEncoding)
+    roc(targets, outputs, 100, encoding)
 end
 
 function roc(targets::AbstractArray,

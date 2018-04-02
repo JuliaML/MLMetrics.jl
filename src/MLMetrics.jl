@@ -38,10 +38,11 @@ export
 
     # roc
     confusions,
-    confusions_as_sensitivity,
+    confusions_at_sensitivity,
     roc,
     specificity_at_sensitivity,
     precision_at_sensitivity,
+    accuracy_at_sensitivity,
     auc, auc_from_rates,
 
     absolute_error,
