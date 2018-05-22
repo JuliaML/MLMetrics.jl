@@ -59,7 +59,12 @@ export
     diagnostic_odds_ratio,
     f1_score,
     matthews_corrcoef
-
+    mutual_info_score
+    normalized_mutual_info_score
+    adjusted_mutual_info_score
+    homogeneity_score
+    completeness_score
+    v_measure_score
 
 include("common.jl")
 include("averagemode.jl")
@@ -74,6 +79,7 @@ using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass
 include("classification/binary.jl")
 include("classification/multiclass.jl")
 include("regression.jl")
+include("clustering.jl")
 
 end # module MLMetrics
 
