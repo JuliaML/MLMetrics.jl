@@ -62,6 +62,7 @@ export
     mutual_info_score,
     normalized_mutual_info_score,
     adjusted_mutual_info_score,
+    adjusted_rand_score,
     homogeneity_score,
     completeness_score,
     v_measure_score
