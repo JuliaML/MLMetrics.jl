@@ -12,16 +12,6 @@ for Clusterings Comparison: Variants, Properties, Normalization
 and Correction for Chance, JMLR
 """
 # ============================================================
-"""
-    immutable ContingencyTable(U, V)
-ContingencyTable is the implementation of Contingency Table introduced
-on Vinh et al. (2010). 'N' is the number of intances at both target and
-output. 'R' is the number of clusters in target which becomesthe number
-of rows. 'C' is the number of clusters in output whichbecomes the number
-of columns. 'a', which is a vector, is themarginal distribution for target
-and 'b' plays the same role foroutput. 'n', whihch is a 2D matrix, is the
-joint distribution of taget and output.
-"""
 immutable ContingencyTable
     N::Int
     R::Int
