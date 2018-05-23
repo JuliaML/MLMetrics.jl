@@ -146,7 +146,9 @@ function MI(target::AbstractVector,
     result
 end
 
-mutual_info_score(target, output) = MI(target, output)
+mutual_info_score(target::AbstractVector,
+                  output::AbstractVector) =
+MI(target, output)
 
 """
     normalized_MI(target, output, mode)
@@ -203,8 +205,10 @@ function normalized_MI(target::AbstractVector,
     result
 end
 
-normalized_mutual_info_score(target, output, mode) =
-               normalized_MI(target, output, mode)
+normalized_mutual_info_score(target::AbstractVector,
+                             output::AbstractVector,
+                             mode::String = "sqrt") =
+normalized_MI(target, output, mode)
 
 """
     EMI(target, output)
@@ -279,8 +283,10 @@ function adjusted_MI(target::AbstractVector,
     result
 end
 
-adjusted_mutual_info_score(target, output, mode) =
-               adjusted_MI(target, output, mode)
+adjusted_mutual_info_score(target::AbstractVector,
+                           output::AbstractVector,
+                           mode::String = "max") =
+adjusted_MI(target, output, mode)
 
 """
     adjusted_rand_score(target, output)
@@ -322,7 +328,9 @@ function homogeneity(target::AbstractVector,
     end
 end
 
-homogeneity_score(target, out) = homogeneity(target, output)
+homogeneity_score(target::AbstractVector,
+                  output::AbstractVector) =
+homogeneity(target, output)
 
 """
     completeness(target, output)
@@ -332,11 +340,13 @@ satisfies completeness if all the data points that are members of a given class
 are elements of the same cluster'.
 """
 function completeness(target::AbstractVector,
-                            output::AbstractVector)
+                      output::AbstractVector)
     return (homogeneity_score(output, target))
 end
 
-completeness_score(target, out) = completeness(target, output)
+completeness_score(target::AbstractVector,
+                   output::AbstractVecto =
+completeness(target, output)
 
 """
     v_measure_score(target, output)
