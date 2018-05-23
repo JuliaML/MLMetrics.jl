@@ -58,12 +58,12 @@ export
     negative_likelihood_ratio,
     diagnostic_odds_ratio,
     f1_score,
-    matthews_corrcoef
-    mutual_info_score
-    normalized_mutual_info_score
-    adjusted_mutual_info_score
-    homogeneity_score
-    completeness_score
+    matthews_corrcoef,
+    mutual_info_score,
+    normalized_mutual_info_score,
+    adjusted_mutual_info_score,
+    homogeneity_score,
+    completeness_score,
     v_measure_score
 
 include("common.jl")
