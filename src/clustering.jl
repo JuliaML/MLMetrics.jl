@@ -146,7 +146,7 @@ function MI(target::AbstractVector,
     result
 end
 
-mutual_info_score(target, out) = MI(target, output)
+mutual_info_score(target, output) = MI(target, output)
 
 """
     normalized_MI(target, output, mode)
