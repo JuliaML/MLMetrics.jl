@@ -82,4 +82,3 @@ include("regression.jl")
 include("clustering.jl")
 
 end # module MLMetrics
-
