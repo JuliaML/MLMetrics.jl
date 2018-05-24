@@ -21,8 +21,7 @@ immutable ContingencyTable
     n::Array{Int,2}
     function ContingencyTable(U::AbstractVector,
                               V::AbstractVector)
-    size(U) == size(V) ||
-    throw(DimensionMismatch("Dimensions of the parameters don't match"))
+    @_dimcheck length(U) == length(V)
     N = length(U)
     U_clusters = collect(Set(U))
     V_clusters = collect(Set(V))
@@ -159,7 +158,7 @@ be selected by 'mode' argument.
 """
 function normalized_MI(target::AbstractVector,
                        output::AbstractVector,
-                       mode::String = "sqrt")
+                       mode::AbstractString = "sqrt")
     result = 0
     if mode == "sqrt"
         denominator = sqrt(H(target) * H(output))
@@ -201,13 +200,15 @@ function normalized_MI(target::AbstractVector,
             result = 2 * MI(target, output) /
                      H(target, output)
         end
+    else
+        throw(DomainError())
     end
     result
 end
 
 normalized_mutual_info_score(target::AbstractVector,
                              output::AbstractVector,
-                             mode::String = "sqrt") =
+                             mode::AbstractString = "sqrt") =
 normalized_MI(target, output, mode)
 
 """
@@ -246,7 +247,7 @@ can be selected by 'mode' argument.
 """
 function adjusted_MI(target::AbstractVector,
                      output::AbstractVector,
-                     mode::String = "max")
+                     mode::AbstractString = "max")
     if mode == "sqrt"
         denominator = sqrt(H(target) * H(output)) - EMI(target, output)
         if denominator == 0
@@ -279,13 +280,15 @@ function adjusted_MI(target::AbstractVector,
             result = (MI(target, output) -  EMI(target, output)) /
                      ((H(target) + H(output)) / 2 - EMI(target, output))
         end
+    else
+        throw(DomainError())
     end
     result
 end
 
 adjusted_mutual_info_score(target::AbstractVector,
                            output::AbstractVector,
-                           mode::String = "max") =
+                           mode::AbstractString = "max") =
 adjusted_MI(target, output, mode)
 
 """
@@ -345,7 +348,7 @@ function completeness(target::AbstractVector,
 end
 
 completeness_score(target::AbstractVector,
-                   output::AbstractVecto =
+                   output::AbstractVector) =
 completeness(target, output)
 
 """
