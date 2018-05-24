@@ -30,7 +30,7 @@ immutable ContingencyTable
     n = zeros(Int64, R, C)
     for i = 1:R
         for j = 1:C
-            n[i, j] = NumberOfIntersection(U_clusters[i], U, V_clusters[j], V)
+            n[i, j] = number_of_intersection(U_clusters[i], U, V_clusters[j], V)
         end
     end
     a = reshape(sum(n, 2), R)
@@ -40,49 +40,49 @@ immutable ContingencyTable
 end
 
 """
-    NumberOf(item, list)
-NumberOf returns the number of the item in the list
+    number_of(item, list)
+number_of returns the number of the item in the list
 """
-function NumberOf(item::Any,
+function number_of(item::Any,
                   list::AbstractVector)
     length(find(list .== item))
 end
 
 """
-    NumberOfIntersection(item_1, list_1, item_2, list_2)
+    number_of_intersection(item_1, list_1, item_2, list_2)
 NumberOfIntersection returns the number of items in the intersection
 of first item in the first liat and second item in the second list.
 """
-function NumberOfIntersection(item_1::Any,
-                              list_1::AbstractVector,
-                              item_2::Any,
-                              list_2::AbstractVector)
+function number_of_intersection(item_1::Any,
+                                list_1::AbstractVector,
+                                item_2::Any,
+                                list_2::AbstractVector)
     logic_1 = item_1 .== list_1
     logic_2 = item_2 .== list_2
     length(find(logic_1 + logic_2 .== 2))
 end
 
 """
-    H(U)
-H(U) returns the entropy of clustering 'U'.
+    entropy(U)
+entropy(U) returns the entropy of clustering 'U'.
 """
-function H(U::AbstractVector)
+function entropy(U::AbstractVector)
     result = 0
     N = length(U)
     clusters = Set(U)
     for c in clusters
-        a = NumberOf(c, U)
+        a = number_of(c, U)
         result += (a / N) * log(a / N)
     end
     -result
 end
 
 """
-    H(U, V)
-H(U, V) returns the joint entropy of clusterings 'U' and 'V'.
+    entropy(U, V)
+entropy(U, V) returns the joint entropy of clusterings 'U' and 'V'.
 """
-function H(U::AbstractVector,
-           V::AbstractVector)
+function entropy(U::AbstractVector,
+                 V::AbstractVector)
     result = 0
     table = ContingencyTable(U, V)
     N = table.N
@@ -98,11 +98,12 @@ function H(U::AbstractVector,
 end
 
 """
-    H_conditional(U, V)
-H_conditional(U, V) returns the conditional entropy of clusterings U given V.
+    entropy_conditional(U, V)
+entropy_conditional(U, V) returns the conditional entropy
+of clusterings U given V.
 """
-function H_conditional(U::AbstractVector,
-                       V::AbstractVector)
+function entropy_conditional(U::AbstractVector,
+                             V::AbstractVector)
     result = 0
     table = ContingencyTable(U, V)
     N = table.N
@@ -121,12 +122,12 @@ end
 
 # ============================================================
 """
-    MI(target, output)
+    mutual_info_score(target, output)
 The Mutual Information is a measure of the similarity and the mutual
 dependence between two labels or clusters of the same data.
 """
-function MI(target::AbstractVector,
-            output::AbstractVector)
+function mutual_info_score(target::AbstractVector,
+                           output::AbstractVector)
     result = 0
     table = ContingencyTable(target, output)
     for i = 1:table.R
@@ -145,60 +146,56 @@ function MI(target::AbstractVector,
     result
 end
 
-mutual_info_score(target::AbstractVector,
-                  output::AbstractVector) =
-MI(target, output)
-
 """
-    normalized_MI(target, output, mode)
-normalized_MI computes mutual information but it limits the range of the
+    normalized_mutual_info_score(target, output, mode)
+normalized_mutual_info_score computes mutual information but it limits the range of the
 return value from 0 (no similarity) to 1 (completely similar). There are
 five different approaches introduced by Vinh et al. (2010), that they can
 be selected by 'mode' argument.
 """
-function normalized_MI(target::AbstractVector,
-                       output::AbstractVector,
-                       mode::AbstractString = "sqrt")
+function normalized_mutual_info_score(target::AbstractVector,
+                                      output::AbstractVector,
+                                      mode::AbstractString = "sqrt")
     result = 0
     if mode == "sqrt"
-        denominator = sqrt(H(target) * H(output))
+        denominator = sqrt(entropy(target) * entropy(output))
         if denominator == 0
             result = 0.0
         else
-            result = MI(target, output) /
-                     sqrt(H(target) * H(output))
+            result = mutual_info_score(target, output) /
+                     denominator
         end
     elseif mode == "max"
-        denominator = max(H(target), H(output))
+        denominator = max(entropy(target), entropy(output))
         if denominator == 0
             result = 0.0
         else
-            result = MI(target, output) /
-                     max(H(target), H(output))
+            result = mutual_info_score(target, output) /
+                     denominator
         end
     elseif mode == "min"
-        denominator = min(H(target), H(output))
+        denominator = min(entropy(target), entropy(output))
         if denominator == 0
             result = 0.0
         else
-            result = MI(target, output) /
-                     min(H(target), H(output))
+            result = mutual_info_score(target, output) /
+                     denominator
         end
     elseif mode == "sum"
-        denominator = H(target) + H(output)
+        denominator = entropy(target) + entropy(output)
         if denominator == 0
             result = 0.0
         else
-            result = 2 * MI(target, output) /
-                     (H(target) + H(output))
+            result = 2 * mutual_info_score(target, output) /
+                     denominator
         end
     elseif mode == "joint"
-        denominator = H(target, output)
+        denominator = entropy(target, output)
         if denominator == 0
             result = 0.0
         else
-            result = 2 * MI(target, output) /
-                     H(target, output)
+            result = mutual_info_score(target, output) /
+                     denominator
         end
     else
         throw(DomainError())
@@ -206,18 +203,13 @@ function normalized_MI(target::AbstractVector,
     result
 end
 
-normalized_mutual_info_score(target::AbstractVector,
-                             output::AbstractVector,
-                             mode::AbstractString = "sqrt") =
-normalized_MI(target, output, mode)
-
 """
-    EMI(target, output)
-EMI returns the expected value of mutual information which is defined
-in Vinh et al. (2010).
+    expected_mutual_informatio(target, output)
+expected_mutual_informatio returns the expected value of mutual
+information which is defined in Vinh et al. (2010).
 """
-function EMI(U::AbstractVector,
-             V::AbstractVector)
+function expected_mutual_information(U::AbstractVector,
+                                     V::AbstractVector)
     result = 0
     table = ContingencyTable(U, V)
     N = table.N
@@ -239,57 +231,60 @@ end
 f(x) = factorial(x)
 
 """
-    adjusted_MI(target, output, mode)
-adjusted_MI returns adjusted mutual information, which is a variation of
-mutual information that adjusts the effect of agreement due to chance between
-clusterings. Vinh et al. (2010) defined four different approaches, that they
-can be selected by 'mode' argument.
+    adjusted_mutual_info_score(target, output, mode)
+adjusted_mutual_info_score returns adjusted mutual information, which is a
+variation ofmutual information that adjusts the effect of agreement due to
+chance between clusterings. Vinh et al. (2010) defined four different
+approaches, that they can be selected by 'mode' argument.
 """
-function adjusted_MI(target::AbstractVector,
-                     output::AbstractVector,
-                     mode::AbstractString = "max")
+function adjusted_mutual_info_score(target::AbstractVector,
+                                    output::AbstractVector,
+                                    mode::AbstractString = "max")
     if mode == "sqrt"
-        denominator = sqrt(H(target) * H(output)) - EMI(target, output)
+        denominator = sqrt(entropy(target) * entropy(output)) -
+        expected_mutual_information(target, output)
         if denominator == 0
             result = 0.0
         else
-            result = (MI(target, output) -  EMI(target, output)) /
-                     (sqrt(H(target) * H(output)) - EMI(target, output))
+            result = (mutual_info_score(target, output) -
+            expected_mutual_information(target, output)) /
+                     denominator
         end
     elseif mode == "max"
-        denominator = max(H(target) * H(output)) - EMI(target, output)
+        denominator = max(entropy(target) * entropy(output)) -
+        expected_mutual_information(target, output)
         if denominator == 0
             result = 0.0
         else
-            result = (MI(target, output) -  EMI(target, output)) /
-                     (max(H(target), H(output)) - EMI(target, output))
+            result = (mutual_info_score(target, output) -
+            expected_mutual_information(target, output)) /
+                     denominator
         end
     elseif mode == "min"
-        denominator = min(H(target) * H(output)) - EMI(target, output)
+        denominator = min(entropy(target) * entropy(output)) -
+        expected_mutual_information(target, output)
         if denominator == 0
             result = 0.0
         else
-            result = (MI(target, output) -  EMI(target, output)) /
-                     (min(H(target), H(output)) - EMI(target, output))
+            result = (mutual_info_score(target, output) -
+            expected_mutual_information(target, output)) /
+                     denominator
         end
     elseif mode == "sum"
-        denominator = (H(target) + H(output)) / 2 - EMI(target, output)
+        denominator = (entropy(target) + entropy(output)) / 2 -
+        expected_mutual_information(target, output)
         if denominator == 0
             result = 0.0
         else
-            result = (MI(target, output) -  EMI(target, output)) /
-                     ((H(target) + H(output)) / 2 - EMI(target, output))
+            result = (mutual_info_score(target, output) -
+            expected_mutual_information(target, output)) /
+                     denominator
         end
     else
         throw(DomainError())
     end
     result
 end
-
-adjusted_mutual_info_score(target::AbstractVector,
-                           output::AbstractVector,
-                           mode::AbstractString = "max") =
-adjusted_MI(target, output, mode)
 
 """
     adjusted_rand_score(target, output)
@@ -304,52 +299,44 @@ function adjusted_rand_score(target::AbstractVector,
     a = table.a
     b = table.b
     n = table.n
-    Index = sum(n .* (n .- 1) ./ 2)
-    Expected_Index = sum(a .* (a .- 1) ./ 2) *
+    index = sum(n .* (n .- 1) ./ 2)
+    expected_index = sum(a .* (a .- 1) ./ 2) *
                      sum(b .* ( b .- 1) ./ 2) / ( N * (N - 1) / 2)
-    Max_Index = 0.5 * (sum(a .* (a .- 1) ./ 2) + sum(b .* (b .- 1) ./ 2))
-    if (Max_Index-Expected_Index) == 0
+    max_index = 0.5 * (sum(a .* (a .- 1) ./ 2) + sum(b .* (b .- 1) ./ 2))
+    if (max_index - expected_index) == 0
         return 0
     else
-        return (Index - Expected_Index) / (Max_Index - Expected_Index)
+        return (index - expected_index) / (max_index - expected_index)
     end
 end
 
 """
-    homogeneity(target, output)
-homogeneity returns the homogeneity measures as introduced in
+    homogeneity_score(target, output)
+homogeneity_score returns the homogeneity measures as introduced in
 Rosenberg and Hirschberg (2007). They define homogeneity: 'A clustering result
 satisfies homogeneity if all of its clusters contain only data points which
 are members of a single class'.
 """
-function homogeneity(target::AbstractVector,
-                     output::AbstractVector)
-   if H(target, output) == 0 || H(target) == 0
+function homogeneity_score(target::AbstractVector,
+                           output::AbstractVector)
+   if entropy(target, output) == 0 || entropy(target) == 0
         return 1.0
     else
-        return 1.0 - (H_conditional(target, output) / H(target))
+        return 1.0 - (entropy_conditional(target, output) / entropy(target))
     end
 end
 
-homogeneity_score(target::AbstractVector,
-                  output::AbstractVector) =
-homogeneity(target, output)
-
 """
-    completeness(target, output)
-completeness returns the completeness measures as introduced in
+    completeness_score(target, output)
+completeness_score returns the completeness measures as introduced in
 Rosenberg and Hirschberg (2007). They define completeness: 'A clustering result
 satisfies completeness if all the data points that are members of a given class
 are elements of the same cluster'.
 """
-function completeness(target::AbstractVector,
-                      output::AbstractVector)
+function completeness_score(target::AbstractVector,
+                            output::AbstractVector)
     return (homogeneity_score(output, target))
 end
-
-completeness_score(target::AbstractVector,
-                   output::AbstractVector) =
-completeness(target, output)
 
 """
     v_measure_score(target, output)
@@ -358,6 +345,7 @@ similar to f1_score.
 """
 function v_measure_score(target::AbstractVector,
                          output::AbstractVector)
-    2 * (homogeneity(target, output) * completeness(target, output)) /
-    (homogeneity(target, output) + completeness(target, output) )
+    2 * (homogeneity_score(target, output) *
+    completeness_score(target, output)) /
+    (homogeneity_score(target, output) + completeness_score(target, output))
 end
