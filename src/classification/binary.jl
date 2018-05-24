@@ -1,205 +1,105 @@
-# (Fuzzy)Binary only
+"""
+    true_positives(target, output, [encoding]) -> Int
 
-# ============================================================
-# Define what it means to be positive / negative
+Returns `1` if both, `target` and `output`, are considered
+positive labels according to `encoding`. Returns `0` otherwise.
+"""
+true_positives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding) & isposlabel(output, encoding))
 
-@inline is_positive(value) = CompareMode._ambiguous()
-@inline is_positive(value, bc::Binary) = (value == bc.pos_label)
-@inline is_positive(value::Bool) = value
-@inline is_positive{T<:Real}(value::T) = (value > zero(T))
-
-@inline is_negative(value) = CompareMode._ambiguous()
-@inline is_negative(value, bc::Binary) = (value != bc.pos_label)
-@inline is_negative{T<:Real}(value::T) = (value <= zero(T))
-
-# ============================================================
+# --------------------------------------------------------------------
 
 """
-    true_positives(target, output, ::FuzzyBinary)
+    true_negatives(target, output, [encoding]) -> Int
 
-Returns `1` if both target and output are considered stricktly
-positive on their own. They are not compared to each other.
-Returns `0` otherwise.
-$pos_examples
+Returns `1` if both, `target` and `output`, are considered
+negative labels according to `encoding`. Returns `0` otherwise.
 """
-@inline true_positives(target, output, ::FuzzyBinary) =
-    Int(is_positive(target) && is_positive(output))
+true_negatives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding) & isneglabel(output, encoding))
 
-"""
-    true_positives(target, output, bc::Binary)
-
-Returns `1` if both, `target` and `output` are equal to
-`bc.pos_label`. Returns `0` otherwise.
-"""
-@inline true_positives(target, output, bc::Binary) =
-    Int(is_positive(target, bc) && is_positive(output, bc))
-
-# ============================================================
+# --------------------------------------------------------------------
 
 """
-    true_negatives(target, output, ::FuzzyBinary)
+    false_positives(target, output, [encoding]) -> Int
 
-Returns `1` if both target and output are considered zero or
-negative on their own. They are not compared to each other.
-Returns `0` otherwise.
-$neg_examples
+Returns `1` if `target` is considered a negative label and
+`output` is considered a positive label (according to `encoding`).
+Returns `0` otherwise. This is also known as type 1 error.
 """
-@inline true_negatives(target, output, ::FuzzyBinary) =
-    Int(is_negative(target) && is_negative(output))
+false_positives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding) & isposlabel(output, encoding))
 
-"""
-    true_negatives(target, output, bc::Binary)
+const type_1_errors = false_positives
 
-Returns `1` if both, `target` and `output` are **not** equal to
-`bc.pos_label`. Returns `0` otherwise.
-"""
-@inline true_negatives(target, output, bc::Binary) =
-    Int(is_negative(target, bc) && is_negative(output, bc))
-
-# ============================================================
+# --------------------------------------------------------------------
 
 """
-    false_positives(target, output, ::FuzzyBinary)
+    false_negatives(target, output, [encoding]) -> Int
 
-Returns `1` if `target` is considered zero or negative,
-and `output` is considered stricktly positive.
-Returns `0` otherwise.
-$pos_examples
-$neg_examples
-"""
-@inline false_positives(target, output, ::FuzzyBinary) =
-    Int(is_negative(target) && is_positive(output))
-
-"""
-    false_positives(target, output, bc::Binary)
-
-Returns `1` if `target` is **not** equal to `bc.pos_label,
-while `output` is equal to it. Returns `0` otherwise.
-"""
-@inline false_positives(target, output, bc::Binary) =
-    Int(is_negative(target, bc) && is_positive(output, bc))
-
-type_1_errors = false_positives
-
-# ============================================================
-
-"""
-    false_negatives(target, output, ::FuzzyBinary)
-
-Returns `1` if `target` is considered strickly positive,
-and `output` is considered zero or negative.
-Returns `0` otherwise.
-$pos_examples
-$neg_examples
-"""
-@inline false_negatives(target, output, ::FuzzyBinary) =
-    Int(is_positive(target) && is_negative(output))
-
-"""
-    false_negatives(target, output, bc::Binary)
-
-Returns `1` if `target` is equal to `bc.pos_label,
-while `output` is **not** equal to it. Returns `0` otherwise.
-"""
-@inline false_negatives(target, output, bc::Binary) =
-    Int(is_positive(target, bc) && is_negative(output, bc))
-
-type_2_errors = false_negatives
-
-# ============================================================
-
-"""
-    condition_positive(target, output, ::FuzzyBinary)
-
-Returns `1` if `target` is considered strictly positive.
-Returns `0` otherwise.
-$pos_examples
-"""
-@inline condition_positive(target, output, ::FuzzyBinary) =
-    Int(is_positive(target))
-
-"""
-    condition_positive(target, output, bc::Binary)
-
-Returns `1` if `target` is equal to `bc.pos_label.
+Returns `1` if `target` is considered a positive label and
+`output` is considered a negative label (according to `encoding`).
 Returns `0` otherwise.
 """
-@inline condition_positive(target, output, bc::Binary) =
-    Int(is_positive(target, bc))
+false_negatives(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding) & isneglabel(output, encoding))
+
+const type_2_errors = false_negatives
+
+# --------------------------------------------------------------------
 
 """
-    prevalence(target, output, bc::(Fuzzy)Binary)
+    condition_positive(target, output, [encoding]) -> Int
 
-Returns the fraction of positive observations in `target`.
-What constitudes as positive depends on `bc`
+Returns `1` if `target` is considered a positive label according
+to `encoding`. Returns `0` otherwise.
 """
-prevalence(target, output, bc) =
-    condition_positive(target, output, bc) / length(target)
-
-# ============================================================
+condition_positive(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding))
 
 """
-    condition_negative(target, output, ::FuzzyBinary)
+    prevalence(targets, outputs, [encoding]) -> Float64
 
-Returns `1` if `target` is considered zero or negative.
-Returns `0` otherwise.
-$neg_examples
+Returns the fraction of positive observations in `targets`.
+What constitutes as positive depends on `encoding`.
 """
-@inline condition_negative(target, output, ::FuzzyBinary) =
-    Int(is_negative(target))
+prevalence(targets, outputs, encoding::BinaryLabelEncoding) =
+    condition_positive(targets, outputs, encoding) / length(targets)
 
-"""
-    condition_negative(target, output, bc::Binary)
-
-Returns `1` if `target` is **not** equal to `bc.pos_label.
-Returns `0` otherwise.
-"""
-@inline condition_negative(target, output, bc::Binary) =
-    Int(is_negative(target, bc))
-
-# ============================================================
+# --------------------------------------------------------------------
 
 """
-    predicted_condition_positive(target, output, ::FuzzyBinary)
+    condition_negative(target, output, [encoding]) -> Int
 
-Returns `1` if `output` is considered strictly positive.
-Returns `0` otherwise.
-$pos_examples
+Returns `1` if `target` is considered a negative label according
+to `encoding`. Returns `0` otherwise.
 """
-@inline predicted_condition_positive(target, output, ::FuzzyBinary) =
-    Int(is_positive(output))
+condition_negative(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(target, encoding))
 
-"""
-    predicted_condition_positive(target, output, bc::Binary)
-
-Returns `1` if `output` is equal to `bc.pos_label.
-Returns `0` otherwise.
-"""
-@inline predicted_condition_positive(target, output, bc::Binary) =
-    Int(is_positive(output, bc))
-
-# ============================================================
+# --------------------------------------------------------------------
 
 """
-    predicted_condition_negative(target, output, ::FuzzyBinary)
+    predicted_condition_positive(target, output, [encoding]) -> Int
 
-Returns `1` if `output` is considered zero or negative.
-Returns `0` otherwise.
-$neg_examples
+Returns `1` if `output` is considered a positive label according
+to `encoding`. Returns `0` otherwise.
 """
-@inline predicted_condition_negative(target, output, ::FuzzyBinary) =
-    Int(is_negative(output))
+predicted_condition_positive(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(output, encoding))
+
+# --------------------------------------------------------------------
 
 """
-    predicted_condition_negative(target, output, bc::Binary)
+    predicted_condition_negative(target, output, [encoding]) -> Int
 
-Returns `1` if `output` is **not** equal to `bc.pos_label.
-Returns `0` otherwise.
+Returns `1` if `output` is considered a negative label according
+to `encoding`. Returns `0` otherwise.
 """
-@inline predicted_condition_negative(target, output, bc::Binary) =
-    Int(is_negative(output, bc))
+predicted_condition_negative(target, output, encoding::BinaryLabelEncoding) =
+    Int(isneglabel(output, encoding))
 
-# ============================================================
+# --------------------------------------------------------------------
 # Generate common fallback functions
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
@@ -208,42 +108,42 @@ for fun in (:true_positives,  :true_negatives,
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
 
-    # Generic fallback. Tries to infer compare mode
-    @eval begin
-        @doc """
-            $($fun_name)(target, output)
-
-        If either `target` or `output` is of type `Bool` then
-        `FuzzyBinary` is inferred as compare mode to compute the
-        **$($fun_desc)**. Any other type combination is ambiguous
-        and will result in an error.
-        """ ->
-        ($fun)(target, output) = ($fun)(target, output, CompareMode.auto(target,output))
+    # Convenience syntax for using native labels
+    @eval function ($fun)(targets::AbstractArray, outputs::AbstractArray, encoding::AbstractVector)
+        length(encoding) == 2 || throw(ArgumentError("The given values in \"encoding\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
+        ($fun)(targets, outputs, LabelEnc.NativeLabels(encoding))
     end
 
-    # prealence is a special case that only needs the fallback
+    # Generic fallback. Tries to infer label encoding
+    @eval function ($fun)(targets, outputs)
+        encoding = comparemode(targets, outputs)
+        nlabel(encoding) == 2 || throw(ArgumentError("The given values in \"targets\" and/or \"outputs\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
+        ($fun)(targets, outputs, encoding)
+    end
+
+    # prevalence is a special case that only needs the fallback
     if fun == :prevalence; continue; end
 
-    # (Fuzzy)Binary: Generate shared accumulator
+    # BinaryLabelEncoding: Generate shared accumulator
     @eval @doc """
-        $($fun_name)(target::AbstractVector, output::AbstractArray, bc::(Fuzzy)Binary)
+        $($fun_name)(targets::AbstractVector, outputs::AbstractArray, [encoding]) -> Int
 
-    Counts the total number of **$($fun_desc)** in `output` by
+    Counts the total number of **$($fun_desc)** in `outputs` by
     comparing each element against the corresponding value in
-    `target` according to `bc`. Both parameters are expected
-    to be vectors, but `output` is allowed to be a row-vector.
-    """ $fun
-    for _T in (:FuzzyBinary, :Binary) # avoid ambiguity warnings
-        @eval function ($fun)(target::AbstractVector,
-                              output::AbstractArray,
-                              compare::$_T)
-            @_dimcheck length(target) == length(output)
-            result = 0
-            @inbounds for i = 1:length(target)
-                result += ($fun)(target[i], output[i], compare)
-            end
-            result
+    `targets` (according to `encoding`). Both parameters are
+    expected to be vectors of some form, which means they are
+    allowed to be row-vectors (or row-matrices).
+
+    $ENCODING_DESCR
+    """ ->
+    function ($fun)(target::AbstractArray,
+                    output::AbstractArray,
+                    encoding::BinaryLabelEncoding)
+        @_dimcheck length(target) == length(output)
+        result = 0
+        @inbounds for i = 1:length(target)
+            result += ($fun)(target[i], output[i], encoding)
         end
+        result
     end
 end
-
