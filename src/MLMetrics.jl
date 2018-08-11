@@ -1,9 +1,49 @@
+__precompile__()
 module MLMetrics
+
+using LearnBase
+using MLLabelUtils
+using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
+using LossFunctions
+using LossFunctions: AverageMode, @_dimcheck
+using UnicodePlots
 
 export
 
-    CompareMode,
-    AverageMode,
+    AvgMode,
+    LabelEnc,
+
+    # binary only
+    true_positives,
+    true_negatives,
+    false_positives, type_1_errors,
+    false_negatives, type_2_errors,
+    condition_positive,
+    prevalence,
+    condition_negative,
+    predicted_condition_positive,
+    predicted_condition_negative,
+
+    # multiclass support
+    positive_predictive_value, precision_score,
+    negative_predictive_value,
+    false_discovery_rate,
+    false_omission_rate,
+    true_positive_rate, sensitivity, recall,
+    false_positive_rate,
+    false_negative_rate,
+    true_negative_rate, specificity,
+    accuracy,
+    f_score, f1_score,
+
+    # roc
+    confusions,
+    confusions_at_sensitivity,
+    roc,
+    specificity_at_sensitivity,
+    precision_at_sensitivity,
+    accuracy_at_sensitivity,
+    auc, auc_from_rates,
 
     absolute_error,
     percent_error,
@@ -29,50 +69,17 @@ export
     explained_variance_score,
     unexplained_variance_score,
     r2_score,
-    true_positives,
-    true_negatives,
-    false_positives,
-    type_1_errors,
-    false_negatives,
-    type_2_errors,
-    condition_positive,
-    condition_negative,
-    predicted_condition_positive,
-    predicted_condition_negative,
-    accuracy_score,
-    accuracy,
-    prevalence,
-    positive_predictive_value,
-    precision_score,
-    false_discovery_rate,
-    negative_predictive_value,
-    false_omission_rate,
-    true_positive_rate,
-    sensitivity,
-    recall,
-    false_positive_rate,
-    false_negative_rate,
-    true_negative_rate,
-    specificity,
     positive_likelihood_ratio,
     negative_likelihood_ratio,
     diagnostic_odds_ratio,
-    f1_score,
     matthews_corrcoef
 
-
-include("common.jl")
-include("averagemode.jl")
-include("classification/comparemode.jl")
-
-#using MLMetrics.AverageMode
-using MLMetrics.AverageMode.AvgMode
-
-using MLMetrics.CompareMode
-using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass
-
+include("upstream.jl")
+include("classification/utils.jl")
 include("classification/binary.jl")
+include("classification/fraction.jl")
 include("classification/multiclass.jl")
+include("classification/roc.jl")
 include("regression.jl")
 
 end # module MLMetrics
