@@ -66,7 +66,7 @@ include("averagemode.jl")
 include("classification/comparemode.jl")
 
 #using MLMetrics.AverageMode
-using MLMetrics.AverageMode.AvgMode
+using MLMetrics.AverageMode: AvgMode
 
 using MLMetrics.CompareMode
 using MLMetrics.CompareMode: AbstractBinary, AbstractMultiClass, FuzzyMultiClass

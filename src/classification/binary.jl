@@ -6,11 +6,11 @@
 @inline is_positive(value) = CompareMode._ambiguous()
 @inline is_positive(value, bc::Binary) = (value == bc.pos_label)
 @inline is_positive(value::Bool) = value
-@inline is_positive{T<:Real}(value::T) = (value > zero(T))
+@inline is_positive(value::T) where {T<:Real} = (value > zero(T))
 
 @inline is_negative(value) = CompareMode._ambiguous()
 @inline is_negative(value, bc::Binary) = (value != bc.pos_label)
-@inline is_negative{T<:Real}(value::T) = (value <= zero(T))
+@inline is_negative(value::T) where {T<:Real} = (value <= zero(T))
 
 # ============================================================
 
@@ -206,7 +206,7 @@ for fun in (:true_positives,  :true_negatives,
             :condition_positive, :condition_negative, :prevalence,
             :predicted_condition_positive, :predicted_condition_negative)
     fun_name = string(fun)
-    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
+    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)" => s"\1 \2"))
 
     # Generic fallback. Tries to infer compare mode
     @eval begin
