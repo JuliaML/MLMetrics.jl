@@ -1,8 +1,8 @@
-using MLMetrics
+module MLMetrics_Test
 using MLLabelUtils
 using LossFunctions
-using Base.Test
-using ReferenceTests
+using MLMetrics
+using Test, ReferenceTests
 
 tests = [
     "classification.jl",
@@ -14,4 +14,4 @@ for test in tests
         include(test)
     end
 end
-
+end

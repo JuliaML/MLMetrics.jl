@@ -329,7 +329,7 @@ const specificity = true_negative_rate
 # --------------------------------------------------------------------
 
 """
-    accuracy(target, output, [encoding]; [normalize = true]) -> Float64
+    accuracy(targets, outputs, [encoding]; [normalize = true]) -> Float64
 
 Compute the classification accuracy for the `outputs` given the
 `targets`. If `normalize` is `true`, the fraction of correctly
@@ -356,7 +356,7 @@ function accuracy(targets::AbstractVector,
                   encoding::BinaryLabelEncoding;
                   normalize = true)
     @_dimcheck length(targets) == length(outputs)
-    tp = 0; tn = 0
+    tp::Int = 0; tn::Int = 0
     @inbounds for i = 1:length(targets)
         target = targets[i]
         output = outputs[i]
@@ -377,7 +377,7 @@ function accuracy(targets::AbstractVector,
                   encoding::LabelEncoding;
                   normalize = true)
     @_dimcheck length(targets) == length(outputs)
-    correct = 0
+    correct::Int = 0
     @inbounds for i = 1:length(targets)
         correct += targets[i] == outputs[i]
     end
@@ -443,7 +443,7 @@ function f_score(targets::AbstractVector,
                  β::Number = 1.0)
     @_dimcheck length(targets) == length(outputs)
     β² = abs2(β)
-    tp = 0; fp = 0; fn = 0
+    tp::Int = 0; fp::Int = 0; fn::Int = 0
     @inbounds for i = 1:length(targets)
         target = targets[i]
         output = outputs[i]

@@ -60,11 +60,11 @@ function Base.show(io::IO, ::MIME"text/plain", c::BinaryConfusionMatrix)
     println(io, pad, "├", repeat("─",len_p+2), "┼", repeat("─",len_n+2), "┤   Actual")
     println(io, pad, "│ ", fp, " │ ", tn, " │ -")
     println(io, pad, "└", repeat("─",len_p+2), "┴", repeat("─",len_n+2), "┘")
-    println(io, pad, "   f1_score: ", round(f1_score(c),4))
-    println(io, pad, "   accuracy: ", round(accuracy(c),4))
-    println(io, pad, "  precision: ", round(precision_score(c),4))
-    println(io, pad, "sensitivity: ", round(sensitivity(c),4))
-    print(io, pad,   "specificity: ", round(specificity(c),4))
+    println(io, pad, "   f1_score: ", round(f1_score(c),digits=4))
+    println(io, pad, "   accuracy: ", round(accuracy(c),digits=4))
+    println(io, pad, "  precision: ", round(precision_score(c),digits=4))
+    println(io, pad, "sensitivity: ", round(sensitivity(c),digits=4))
+    print(io, pad,   "specificity: ", round(specificity(c),digits=4))
 end
 
 # --------------------------------------------------------------------
@@ -87,8 +87,8 @@ function confusions(targets::AbstractArray,
                     outputs::AbstractArray,
                     encoding::BinaryLabelEncoding)
     @_dimcheck length(targets) == length(outputs)
-    tp = 0; tn = 0;
-    fp = 0; fn = 0;
+    tp::Int = 0; tn::Int = 0;
+    fp::Int = 0; fn::Int = 0;
     @inbounds for i in 1:length(targets)
         target = targets[i]
         output = outputs[i]
@@ -186,7 +186,7 @@ function accuracy_at_sensitivity(r::ROCCurve, at::Number)
 end
 
 function Base.show(io::IO, r::ROCCurve)
-    print(io, length(r), "-element ", typeof(r).name, " (auc: ", round(auc(r),5), ")")
+    print(io, length(r), "-element ", typeof(r).name, " (auc: ", round(auc(r),digits=5), ")")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", r::ROCCurve)
@@ -194,11 +194,11 @@ function Base.show(io::IO, ::MIME"text/plain", r::ROCCurve)
     fpr = false_positive_rate(r)
     tpr = true_positive_rate(r)
     p = lineplot(fpr, tpr, height=10, width=21, xlim=[0,1], ylim=[0,1], canvas=DotCanvas)
-    annotate!(p, :r, 1, "auc: $(round(auc_from_rates(fpr, tpr),5))")
+    annotate!(p, :r, 1, "auc: $(round(auc_from_rates(fpr, tpr),digits=5))")
     lineplot!(p, 0, 1, color=:white)
     xlabel!(p, "FPR")
     ylabel!(p, "TPR")
-    print(io, string(p)[1:end-6])
+    print(io, p)
 end
 
 # --------------------------------------------------------------------
@@ -225,7 +225,7 @@ function roc(targets::AbstractArray,
              outputs::AbstractArray,
              thresholds::Number = 100,
              encoding::BinaryLabelEncoding = labelenc(targets))
-    roc(targets, outputs, linspace(1,0,thresholds), encoding)
+    roc(targets, outputs, range(1,stop=0,length=thresholds), encoding)
 end
 
 function roc(targets::AbstractArray,

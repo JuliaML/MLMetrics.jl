@@ -8,7 +8,7 @@ Base.convert(::Type{AverageMode}, avgmode::AverageMode) = avgmode
 Base.convert(::Type{AverageMode}, avgmode::String) = convert(AverageMode, Symbol(lowercase(avgmode)))
 Base.convert(::Type{AverageMode}, ::typeof(sum)) = AvgMode.Sum()
 Base.convert(::Type{AverageMode}, ::typeof(mean)) = AvgMode.Mean()
-Base.convert(::Type{AverageMode}, ::Void) = AvgMode.None()
+Base.convert(::Type{AverageMode}, ::Nothing) = AvgMode.None()
 function Base.convert(::Type{AverageMode}, avgmode::Symbol)
     if avgmode == :mean
         AvgMode.Mean()

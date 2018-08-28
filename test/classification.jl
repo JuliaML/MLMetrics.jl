@@ -1,4 +1,4 @@
-using MLLabelUtils.LabelEnc.FuzzyBinary
+using MLLabelUtils: LabelEnc.FuzzyBinary
 
 @testset "test that synonyms work"  begin
     @test type_1_errors === false_positives

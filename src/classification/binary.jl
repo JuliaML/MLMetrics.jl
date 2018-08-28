@@ -106,7 +106,7 @@ for fun in (:true_positives,  :true_negatives,
             :condition_positive, :condition_negative, :prevalence,
             :predicted_condition_positive, :predicted_condition_negative)
     fun_name = string(fun)
-    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)", s"\1 \2"))
+    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)" => s"\1 \2"))
 
     # Convenience syntax for using native labels
     @eval function ($fun)(targets::AbstractArray, outputs::AbstractArray, encoding::AbstractVector)
@@ -126,7 +126,7 @@ for fun in (:true_positives,  :true_negatives,
 
     # BinaryLabelEncoding: Generate shared accumulator
     @eval @doc """
-        $($fun_name)(targets::AbstractVector, outputs::AbstractArray, [encoding]) -> Int
+        $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Int
 
     Counts the total number of **$($fun_desc)** in `outputs` by
     comparing each element against the corresponding value in
@@ -135,14 +135,14 @@ for fun in (:true_positives,  :true_negatives,
     allowed to be row-vectors (or row-matrices).
 
     $ENCODING_DESCR
-    """ ->
-    function ($fun)(target::AbstractArray,
-                    output::AbstractArray,
+    """
+    function ($fun)(targets::AbstractArray,
+                    outputs::AbstractArray,
                     encoding::BinaryLabelEncoding)
-        @_dimcheck length(target) == length(output)
-        result = 0
-        @inbounds for i = 1:length(target)
-            result += ($fun)(target[i], output[i], encoding)
+        @_dimcheck length(targets) == length(outputs)
+        result::Int = 0
+        @inbounds for i = 1:length(targets)
+            result += ($fun)(targets[i], outputs[i], encoding)
         end
         result
     end

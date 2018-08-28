@@ -82,7 +82,7 @@ function reduce_fraction(
         encoding::BinaryLabelEncoding,
         avgmode::AverageMode)
     @_dimcheck length(targets) == length(outputs)
-    numer = 0; denom = 0
+    numer::Int = 0; denom::Int = 0
     @inbounds for I in eachindex(targets, outputs)
         target = targets[I]
         output = outputs[I]

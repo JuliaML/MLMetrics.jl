@@ -1,4 +1,3 @@
-__precompile__()
 module MLMetrics
 
 using LearnBase
@@ -7,6 +6,7 @@ using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
 using LossFunctions
 using LossFunctions: AverageMode, @_dimcheck
 using UnicodePlots
+using Statistics
 
 export
 
@@ -83,4 +83,3 @@ include("classification/roc.jl")
 include("regression.jl")
 
 end # module MLMetrics
-
