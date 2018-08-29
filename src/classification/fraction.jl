@@ -8,7 +8,7 @@ aggregate_fraction(numerator, denominator, labels, ::AvgMode.None) =
     Dict(Pair.(labels, numerator ./ denominator))
 
 aggregate_fraction(numerator, denominator, labels, ::AvgMode.Macro) =
-    mean(numerator ./ denominator)
+    mean(broadcasted(/, numerator, denominator))
 
 aggregate_fraction(numerator, denominator, labels, ::AvgMode.Micro) =
     sum(numerator) / sum(denominator)
@@ -80,7 +80,7 @@ function reduce_fraction(
         targets::AbstractVector,
         outputs::AbstractArray,
         encoding::BinaryLabelEncoding,
-        avgmode::AverageMode)
+        avgmode::AvgMode.None)
     @_dimcheck length(targets) == length(outputs)
     numer::Int = 0; denom::Int = 0
     @inbounds for I in eachindex(targets, outputs)

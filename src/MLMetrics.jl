@@ -7,6 +7,7 @@ using LossFunctions
 using LossFunctions: AverageMode, @_dimcheck
 using UnicodePlots
 using Statistics
+using Base.Broadcast
 
 export
 
