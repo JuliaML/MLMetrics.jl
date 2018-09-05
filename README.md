@@ -30,14 +30,7 @@ following example shows how to get additional information on
 
 ## Installation
 
-This package is registered in `METADATA.jl` and can be installed
-as usual. Just start up Julia and type the following code snippet
-into the REPL. It makes use of the native Julia package manger.
-
-``` julia
-import Pkg
-Pkg.add("MLMetrics")
-```
+Not yet registered. WIP
 
 ## License
 
