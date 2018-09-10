@@ -5,8 +5,12 @@ struct BinaryConfusionMatrix{T<:Number} <: AbstractArray{T,2}
     true_negatives::T
 end
 
-BinaryConfusionMatrix() = BinaryConfusionMatrix{Int}(0,0,0,0)
-BinaryConfusionMatrix(a::AbstractArray) = BinaryConfusionMatrix{Int}(a...)
+(::Type{BinaryConfusionMatrix{T}})() where {T} = BinaryConfusionMatrix{T}(0,0,0,0)
+BinaryConfusionMatrix() = BinaryConfusionMatrix{Int}()
+function BinaryConfusionMatrix(A::AbstractArray)
+    @assert length(A) == 4
+    BinaryConfusionMatrix{Int}(Tuple(A)...)
+end
 
 function Base.:(+)(a::BinaryConfusionMatrix{T},
                    b::BinaryConfusionMatrix{S}) where {T,S}
@@ -18,7 +22,8 @@ function Base.:(+)(a::BinaryConfusionMatrix{T},
     )
 end
 
-Base.size(c::BinaryConfusionMatrix) = (2, 2)
+@inline Core.Tuple(c::BinaryConfusionMatrix) = (c.true_positives, c.false_positives, c.false_negatives, c.true_negatives)
+@inline Base.size(c::BinaryConfusionMatrix) = (2, 2)
 function Base.getindex(c::BinaryConfusionMatrix, i::Int, j::Int)
     ifelse((i == 1) & (j == 1), c.true_positives,
     ifelse((i == 2) & (j == 1), c.false_positives,
@@ -35,12 +40,12 @@ condition_negative(c::BinaryConfusionMatrix) =
     true_negatives(c) + false_positives(c)
 LearnBase.nobs(c::BinaryConfusionMatrix) =
     condition_positive(c) + condition_negative(c)
-prevalence(c::BinaryConfusionMatrix) =
-    condition_positive(c) / nobs(c)
 predicted_condition_positive(c::BinaryConfusionMatrix) =
     true_positives(c) + false_positives(c)
 predicted_condition_negative(c::BinaryConfusionMatrix) =
     true_negatives(c) + false_negatives(c)
+prevalence(c::BinaryConfusionMatrix) =
+    condition_positive(c) / nobs(c)
 
 function Base.show(io::IO, ::MIME"text/plain", c::BinaryConfusionMatrix)
     println(io, summary(c), ":")
@@ -92,10 +97,10 @@ function confusions(targets::AbstractArray,
     @inbounds for i in 1:length(targets)
         target = targets[i]
         output = outputs[i]
-        tp += true_positives(target, output, encoding)
+        tp +=  true_positives(target, output, encoding)
         fp += false_positives(target, output, encoding)
         fn += false_negatives(target, output, encoding)
-        tn += true_negatives(target, output, encoding)
+        tn +=  true_negatives(target, output, encoding)
     end
     BinaryConfusionMatrix{Int}(tp, fp, fn, tn)
 end
@@ -105,17 +110,17 @@ function confusions(targets::AbstractArray,
                     thresholds::AbstractVector,
                     encoding::BinaryLabelEncoding)
     @_dimcheck length(targets) == length(outputs)
-    curve = fill(BinaryConfusionMatrix(), length(thresholds))
+    curve = fill(BinaryConfusionMatrix{Int}(), length(thresholds))
     @inbounds for i in 1:length(targets)
         target = targets[i]
         output = outputs[i]
         for (j, th) in enumerate(thresholds)
             pred = convertlabel(encoding, classify(output, th), LabelEnc.ZeroOne())
             curve[j] += BinaryConfusionMatrix{Int}(
-                true_positives(target, pred, encoding),
+                 true_positives(target, pred, encoding),
                 false_positives(target, pred, encoding),
                 false_negatives(target, pred, encoding),
-                true_negatives(target, pred, encoding),
+                 true_negatives(target, pred, encoding),
             )
         end
     end
@@ -130,6 +135,7 @@ struct ROCCurve{T<:Number,F<:Number,V<:AbstractVector{F}} <: AbstractArray{Tuple
 end
 
 function ROCCurve(thresholds::AbstractVector, confusions::Vector{BinaryConfusionMatrix{T}}) where T
+    @_dimcheck length(thresholds) == length(confusions)
     ROCCurve{T,eltype(thresholds),typeof(thresholds)}(thresholds, confusions)
 end
 
@@ -168,7 +174,7 @@ end
 confusions(r::ROCCurve) = r.confusions
 
 function confusions_at_sensitivity(r::ROCCurve, at::Number)
-    @assert 0 <= at <= 1
+    0 <= at <= 1 || throw(ArgumentError("parameter \"at\" has to be in [0, 1]"))
     idx = findfirst(s -> s >= at, sensitivity(r))
     r[idx][2]
 end

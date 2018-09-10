@@ -3,8 +3,8 @@ module MLMetrics
 using LearnBase
 using MLLabelUtils
 using MLLabelUtils: LabelEncoding, BinaryLabelEncoding
-using LossFunctions
-using LossFunctions: AverageMode, @_dimcheck
+import LossFunctions
+using LossFunctions: @_dimcheck
 using UnicodePlots
 using Statistics
 using Base.Broadcast
@@ -75,7 +75,7 @@ export
     diagnostic_odds_ratio,
     matthews_corrcoef
 
-include("upstream.jl")
+include("averagemode.jl")
 include("classification/utils.jl")
 include("classification/binary.jl")
 include("classification/fraction.jl")

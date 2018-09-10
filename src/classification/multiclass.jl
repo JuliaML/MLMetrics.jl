@@ -508,8 +508,8 @@ f_score(targets, outputs, labels::AbstractVector, args...) =
 f_score(targets, outputs, β::Number = 1.0) =
     f_score(targets, outputs, comparemode(targets, outputs), AvgMode.None(), β)
 
-f_score(targets, outputs, avgmode::AverageMode) =
-    f_score(targets, outputs, comparemode(targets, outputs), avgmode, 1.0)
+f_score(targets, outputs, avgmode::AverageMode, β::Number = 1.0) =
+    f_score(targets, outputs, comparemode(targets, outputs), avgmode, β)
 
 """
     f1_score(targets, outputs, [encoding], [avgmode])
