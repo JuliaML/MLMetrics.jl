@@ -1,5 +1,5 @@
 module MLMetrics_Test
-using MLLabelUtils, LossFunctions
+using MLLabelUtils
 using Test, ReferenceTests
 
 # check for ambiguities
@@ -10,8 +10,8 @@ ambs = detect_ambiguities(MLMetrics, Base, Core)
 
 classification_tests = [
     "counts.jl",
-    "roc.jl",
-    "fractions.jl",
+#   "roc.jl",
+#   "fractions.jl",
 ]
 
 @testset "classification" begin

@@ -57,15 +57,6 @@ to `encoding`. Return `0` otherwise.
 condition_positive(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(target, encoding))
 
-"""
-    prevalence(targets, outputs, [encoding]) -> Float64
-
-Return the fraction of positive observations in `targets`.
-What constitutes as positive depends on `encoding`.
-"""
-prevalence(targets, outputs, encoding::BinaryLabelEncoding) =
-    condition_positive(targets, outputs, encoding) / length(targets)
-
 # --------------------------------------------------------------------
 
 """
@@ -100,33 +91,66 @@ predicted_condition_negative(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(output, encoding))
 
 # --------------------------------------------------------------------
+
+"""
+    correctly_classified(target, output, [encoding]) -> Int
+
+Return `1` if `output` is considered equal to `target`
+(according to `encoding`). Return `0` otherwise.
+"""
+correctly_classified(target, output, encoding::BinaryLabelEncoding) =
+    Int(isposlabel(target, encoding) == isposlabel(output, encoding))
+
+# --------------------------------------------------------------------
+
+"""
+    incorrectly_classified(target, output, [encoding]) -> Int
+
+Return `1` if `output` is considered different from `target`
+(according to `encoding`). Return `0` otherwise.
+"""
+incorrectly_classified(target, output, encoding::BinaryLabelEncoding) =
+    Int(xor(isposlabel(target, encoding), isposlabel(output, encoding)))
+
+const misclassified = incorrectly_classified
+
+# --------------------------------------------------------------------
 # Generate common fallback functions
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
-            :condition_positive, :condition_negative, :prevalence,
-            :predicted_condition_positive, :predicted_condition_negative)
+            :condition_positive, :condition_negative,
+            :predicted_condition_positive, :predicted_condition_negative,
+            :correctly_classified, :incorrectly_classified)
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)" => s"\1 \2"))
 
     # Convenience syntax for using native labels
     @eval function ($fun)(targets, outputs, encoding::AbstractVector)
-        length(encoding) == 2 || throw(ArgumentError("The given values in \"encoding\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
         ($fun)(targets, outputs, LabelEnc.NativeLabels(encoding))
     end
 
     # Generic fallback. Tries to infer label encoding
     @eval function ($fun)(targets, outputs)
         encoding = comparemode(targets, outputs)
-        nlabel(encoding) == 2 || throw(ArgumentError("The given values in \"targets\" and/or \"outputs\" contain more than two distinct labels. $($fun) only support binary label encodings. Consider using LabelEnc.OneVsRest"))
         ($fun)(targets, outputs, encoding)
     end
 
-    # prevalence is a special case that only needs the fallback
-    if fun == :prevalence; continue; end
-
     # BinaryLabelEncoding: Generate shared accumulator
+    @eval function ($fun)(
+            targets::AbstractArray,
+            outputs::AbstractArray,
+            encoding::BinaryLabelEncoding)
+        @_dimcheck length(targets) == length(outputs)
+        result::Int = 0
+        @inbounds for I in eachindex(targets, outputs)
+            result += ($fun)(targets[I], outputs[I], encoding)
+        end
+        result
+    end
+
+    # Multiclass case
     @eval @doc """
-        $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Int
+        $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Union{Int, Dict}
 
     Count the total number of **$($fun_desc)** in `outputs` by
     comparing each element against the corresponding value in
@@ -136,14 +160,21 @@ for fun in (:true_positives,  :true_negatives,
 
     $ENCODING_DESCR
     """
-    function ($fun)(targets::AbstractArray,
-                    outputs::AbstractArray,
-                    encoding::BinaryLabelEncoding)
+    function ($fun)(
+            targets::AbstractArray,
+            outputs::AbstractArray,
+            encoding::LabelEncoding)
         @_dimcheck length(targets) == length(outputs)
-        result::Int = 0
+        labels = label(encoding)
+        results = zeros(Int, length(labels))
+        ovr = [LabelEnc.OneVsRest(l) for l in labels]
         @inbounds for I in eachindex(targets, outputs)
-            result += ($fun)(targets[I], outputs[I], encoding)
+            target = targets[I]
+            output = outputs[I]
+            for j in eachindex(results, ovr)
+                results[j] += ($fun)(target, output, ovr[j])
+            end
         end
-        result
+        Dict(Pair.(labels, results))
     end
 end

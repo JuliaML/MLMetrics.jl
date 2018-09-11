@@ -1,12 +1,12 @@
 const ENCODING_DESCR = """
     The optional parameter `encoding` serves as specifcation of
     the existing labels and their interpretation (e.g. what
-    constitutes as positive or negative). It can either be an
-    object from the namespace `LabelEnc`, or a vector of labels.
-    If omitted, the appropriate `encoding` will be inferred from
-    the types and/or values of `targets` and `outputs`. In
-    general this will be slower than specifying the `encoding`
-    explicitly.
+    constitutes as positive or negative, how many classes exist, etc).
+    It can either be an object from the namespace `LabelEnc`, or
+    a vector of labels. If omitted, the appropriate `encoding`
+    will be inferred from the types and/or values of `targets`
+    and `outputs`. Note that omitting the `encoding` can cause
+    performance penalties, which may include a lack of type stability.
     """
 
 const AVGMODE_DESCR = """

@@ -14,16 +14,19 @@ export
     AvgMode,
     LabelEnc,
 
-    # binary only
+    # counts
     true_positives,
     true_negatives,
     false_positives, type_1_errors,
     false_negatives, type_2_errors,
     condition_positive,
-    prevalence,
     condition_negative,
     predicted_condition_positive,
     predicted_condition_negative,
+    correctly_classified,
+    incorrectly_classified, misclassified,
+
+    prevalence,
 
     # multiclass support
     positive_predictive_value, precision_score,
@@ -77,9 +80,9 @@ export
 
 include("averagemode.jl")
 include("classification/utils.jl")
-include("classification/binary.jl")
+include("classification/counts.jl")
 include("classification/fraction.jl")
-include("classification/multiclass.jl")
+include("classification/metrics.jl")
 include("classification/roc.jl")
 include("regression.jl")
 

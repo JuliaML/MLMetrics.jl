@@ -1,4 +1,15 @@
-# Binary and Multiclass
+# --------------------------------------------------------------------
+# prevalence is a bit of an outlier
+
+"""
+    prevalence(targets, outputs, [encoding]) -> Float64
+
+Return the fraction of positive observations in `targets`.
+What constitutes as positive depends on `encoding`.
+"""
+prevalence(targets, outputs, encoding::BinaryLabelEncoding) =
+    condition_positive(targets, outputs, encoding) / length(targets)
+
 # --------------------------------------------------------------------
 
 @reduce_fraction """
