@@ -8,29 +8,25 @@ using MLMetrics
 ambs = detect_ambiguities(MLMetrics, Base, Core)
 @test Set(setdiff(ambs, refambs)) == Set{Tuple{Method,Method}}()
 
-classification_tests = [
+classification_tests = joinpath.("classification", [
     "counts.jl",
 #   "roc.jl",
 #   "fractions.jl",
-]
+])
 
-@testset "classification" begin
-    for test in classification_tests
-        @testset "$test" begin
-            include(joinpath("classification", test))
-        end
+for test in classification_tests
+    @testset "$test" begin
+        include(test)
     end
 end
 
-regression_tests = [
+regression_tests = joinpath.("regression", [
     "regression.jl"
-]
+])
 
-@testset "regression" begin
-    for test in regression_tests
-        @testset "$test" begin
-            include(joinpath("regression", test))
-        end
+for test in regression_tests
+    @testset "$test" begin
+        include(test)
     end
 end
 end

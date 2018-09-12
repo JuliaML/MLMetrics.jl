@@ -4,7 +4,10 @@
     @test misclassified === incorrectly_classified
 end
 
-const count_funs = (
+# --------------------------------------------------------------------
+# scalar
+
+const fun_refs_scalar = [
     (true_positives,  (0,0,0,1)),
     (true_negatives,  (1,0,0,0)),
     (false_positives, (0,1,0,0)),
@@ -15,16 +18,16 @@ const count_funs = (
     (predicted_condition_negative, (1,0,1,0)),
     (correctly_classified,   (1,0,0,1)),
     (incorrectly_classified, (0,1,1,0)),
-)
+]
 
-@testset "scalar fuzzy without encoding" begin
+@testset "scalar fuzzy with/without encoding" begin
     # Test the simple non-array (i.e. scalar) methods that
     # expect scalar values (single observations).
     # The scalar methods require either an encoding or at least
     # one boolean parameter. The later results in FuzzyBinary.
     # Here we test all cases of scalar fuzzy matching.
     enc = LabelEnc.FuzzyBinary()
-    for (fun, mask) in count_funs
+    for (fun, mask) in fun_refs_scalar
         @testset "$(fun): boolean parameters" begin
             @test @inferred(fun(false, false)) === mask[1]
             @test @inferred(fun(false, true )) === mask[2]
@@ -67,8 +70,8 @@ const count_funs = (
 end
 
 @testset "scalar with encoding" begin
-    for (fun, mask) in count_funs
-        @testset "$(fun): Binary" begin
+    for (fun, mask) in fun_refs_scalar
+        @testset "$(fun): binary" begin
             enc = LabelEnc.ZeroOne()
             @test @inferred(fun(0,   0,   enc)) === mask[1]
             @test @inferred(fun(0,   0.2, enc)) === mask[1]
@@ -101,6 +104,10 @@ end
             @test @inferred(fun(:neg, :pos, enc)) === mask[2]
             @test @inferred(fun(:pos, :neg, enc)) === mask[3]
             @test @inferred(fun(:pos, :pos, enc)) === mask[4]
+            @test fun(:neg, :neg, [:pos, :neg]) === mask[1]
+            @test fun(:neg, :pos, [:pos, :neg]) === mask[2]
+            @test fun(:pos, :neg, [:pos, :neg]) === mask[3]
+            @test fun(:pos, :pos, [:pos, :neg]) === mask[4]
             enc = LabelEnc.OneVsRest("pos")
             @test_throws ArgumentError fun("neg", "pos")
             @test @inferred(fun("foo", "bar", enc)) === mask[1]
@@ -116,8 +123,7 @@ end
             @test_throws ArgumentError fun([0,1], [0,1], enc)
             @test_throws ArgumentError fun([0 1], [0 1], enc)
         end
-
-        @testset "$(fun): Multiclass" begin
+        @testset "$(fun): multiclass" begin
             enc = LabelEnc.Indices(3)
             @test @inferred(fun(1, 2, enc)) == Dict{Int,Int}(
                 1 => mask[3],
@@ -150,6 +156,21 @@ end
                 :b => mask[2],
                 :c => mask[3],
             )
+            @test fun(:a, :b, [:a, :b, :c]) == Dict{Symbol,Int}(
+                :a => mask[3],
+                :b => mask[2],
+                :c => mask[1],
+            )
+            @test fun(:b, :b, [:a, :b, :c]) == Dict{Symbol,Int}(
+                :a => mask[1],
+                :b => mask[4],
+                :c => mask[1],
+            )
+            @test fun(:c, :b, [:a, :b, :c]) == Dict{Symbol,Int}(
+                :a => mask[1],
+                :b => mask[2],
+                :c => mask[3],
+            )
             enc = LabelEnc.OneOfK(3)
             @test_throws ArgumentError fun(1, 1, enc)
             @test_throws ArgumentError fun(1, [0,1], enc)
@@ -160,3 +181,105 @@ end
     end
 end
 
+# --------------------------------------------------------------------
+# arrays
+
+y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+y_true_m = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1]
+y_true_i = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
+y_true_b = Vector{Bool}(y_true_p)
+y_true_pf = Vector{Float64}(y_true_p)
+y_true_mf = Vector{Float64}(y_true_m)
+y_true_sym = convertlabel([:pos,:neg], y_true_p, LabelEnc.ZeroOne())
+y_true_sym2 = [:a, :a, :a, :a, :a, :a, :a, :a, :a, :a, :b, :b, :b, :b, :c, :c, :c]
+y_true_c = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3]
+
+y_hat_p  = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+y_hat_m  = [1, 1,-1,-1, 1,-1, 1,-1,-1, 1,-1, 1,-1, 1,-1, 1,-1]
+y_hat_i  = [1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+y_hat_b  = Vector{Bool}(y_hat_p)
+y_hat_pf = Vector{Float64}(y_hat_p)
+y_hat_mf = Vector{Float64}(y_hat_m)
+y_hat_sym  = convertlabel([:pos,:neg], y_hat_p,  LabelEnc.ZeroOne())
+y_hat_sym2  = [:a, :a, :b, :c, :a, :b, :a, :c, :c, :a, :c, :a, :c, :a, :b, :a, :c]
+y_hat_c  = [1, 1, 2, 3, 1, 2, 1, 3, 3, 1, 3, 1, 3, 1, 2, 1, 3]
+
+const fun_refs_arrays = [
+    (true_positives,  5),
+    (true_negatives,  4),
+    (false_positives, 3),
+    (false_negatives, 5),
+    (condition_positive, 10),
+    (condition_negative, 7),
+    (predicted_condition_positive, 8),
+    (predicted_condition_negative, 9),
+    (correctly_classified, 9),
+    (incorrectly_classified, 8),
+]
+
+@testset "arrays fuzzy with/without encoding" begin
+    targets = [y_true_p, y_true_m, y_true_b, y_true_pf, y_true_mf]
+    outputs = [y_hat_p, y_hat_m, y_hat_b, y_hat_pf, y_hat_mf, y_hat_b']
+    for (fun, ref) in fun_refs_arrays
+        @testset "$fun: binary" begin
+            for target in targets, output in outputs
+                @testset "$(typeof(target)) against $(typeof(output))" begin
+                    @test @inferred(fun(target, output, LabelEnc.FuzzyBinary())) === ref
+                    if eltype(target) <: Bool || eltype(output) <: Bool
+                        @test @inferred(fun(target, output)) === ref
+                    end
+                end
+            end
+        end
+    end
+end
+
+@testset "arrays with/without encoding" begin
+    binary_data = [
+        (y_true_p,    y_hat_p,    LabelEnc.ZeroOne()),
+        (y_true_p,    y_hat_pf,   LabelEnc.ZeroOne()),
+        (y_true_pf,   y_hat_p,    LabelEnc.ZeroOne()),
+        (y_true_pf,   y_hat_pf,   LabelEnc.ZeroOne()),
+        (y_true_m,    y_hat_m,    LabelEnc.MarginBased()),
+        (y_true_m,    y_hat_mf,   LabelEnc.MarginBased()),
+        (y_true_mf,   y_hat_m,    LabelEnc.MarginBased()),
+        (y_true_mf,   y_hat_mf,   LabelEnc.MarginBased()),
+        (y_true_i,    y_hat_i,    LabelEnc.Indices(2)),
+        (y_true_b,    y_hat_b,    LabelEnc.TrueFalse()),
+        (y_true_sym,  y_hat_sym,  LabelEnc.NativeLabels([:pos,:neg])),
+        (y_true_sym,  y_hat_sym,  LabelEnc.OneVsRest(:pos)),
+        (y_true_sym2, y_hat_sym2, LabelEnc.OneVsRest(:a)),
+    ]
+    multiclass_data = [
+        (y_true_sym2, y_hat_sym2, LabelEnc.NativeLabels([:a,:b,:c])),
+        (y_true_c,          y_hat_c,  LabelEnc.Indices(3)),
+        (Int32.(y_true_c),  y_hat_c,  LabelEnc.Indices(3)),
+        (y_true_c, Float32.(y_hat_c), LabelEnc.Indices(3)),
+    ]
+    for (fun, ref) in fun_refs_arrays
+        @testset "$fun: binary" begin
+            for (target, output, enc) in binary_data
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc)" begin
+
+                    @test @inferred(fun(target, output, enc)) === ref
+                    if nlabel(target) == 2
+                        @test fun(target, output) === ref
+                    end
+                end
+            end
+            # this is not type stable (number of labels not static)
+            @test fun(y_true_sym, y_hat_sym, [:pos, :neg]) === ref
+        end
+        @testset "$fun: multiclass" begin
+            for (target, output, enc) in multiclass_data
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc)" begin
+                    res = Dict(map(label(enc)) do l
+                        l => fun(target, output, LabelEnc.OneVsRest(l))
+                    end)
+                    @test @inferred(fun(target, output, enc)) == res
+                    @test fun(target, output) == res
+                end
+            end
+        end
+    end
+end

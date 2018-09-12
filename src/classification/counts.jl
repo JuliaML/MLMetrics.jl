@@ -158,6 +158,7 @@ for fun in (:true_positives,  :true_negatives,
         result
     end
 
+    # Multiclass LabelEncoding: Generate shared accumulator
     @eval @doc """
         $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Union{Int, Dict}
 
