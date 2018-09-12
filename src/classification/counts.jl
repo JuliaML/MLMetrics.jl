@@ -148,7 +148,16 @@ for fun in (:true_positives,  :true_negatives,
         result
     end
 
-    # Multiclass case
+    # Multiclass LabelEncoding: Implementation for scalar
+    @eval function ($fun)(target, output, encoding::LabelEncoding)
+        labels = label(encoding)
+        result = Dict{eltype(labels),Int}()
+        for l in labels
+            result[l] = ($fun)(target, output, LabelEnc.OneVsRest(l))
+        end
+        result
+    end
+
     @eval @doc """
         $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Union{Int, Dict}
 
@@ -176,5 +185,14 @@ for fun in (:true_positives,  :true_negatives,
             end
         end
         Dict(Pair.(labels, results))
+    end
+
+    # Disable support for OneOfK (otherwise behaviour is misleading)
+    @eval function ($fun)(target, output, encoding::LabelEnc.OneOfK)
+        throw(ArgumentError("encoding LabelEnc.OneOfK not yet supported"))
+    end
+
+    @eval function ($fun)(targets::AbstractArray, outputs::AbstractArray, encoding::LabelEnc.OneOfK)
+        throw(ArgumentError("encoding LabelEnc.OneOfK not yet supported"))
     end
 end

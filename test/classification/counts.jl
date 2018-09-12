@@ -107,10 +107,56 @@ end
             @test @inferred(fun("baz", "pos", enc)) === mask[2]
             @test @inferred(fun("pos", "foo", enc)) === mask[3]
             @test @inferred(fun("pos", "pos", enc)) === mask[4]
-            # TODO: OneOfK
+            enc = LabelEnc.OneOfK(2)
+            @test_throws ArgumentError fun([1,0], 1)
+            @test_throws ArgumentError fun(1, [0,1])
+            @test_throws ArgumentError fun(1, 1, enc)
+            @test_throws ArgumentError fun(1, [0,1], enc)
+            @test_throws ArgumentError fun([0,1], 1, enc)
+            @test_throws ArgumentError fun([0,1], [0,1], enc)
+            @test_throws ArgumentError fun([0 1], [0 1], enc)
+        end
+
+        @testset "$(fun): Multiclass" begin
+            enc = LabelEnc.Indices(3)
+            @test @inferred(fun(1, 2, enc)) == Dict{Int,Int}(
+                1 => mask[3],
+                2 => mask[2],
+                3 => mask[1],
+            )
+            @test @inferred(fun(2, 2, enc)) == Dict{Int,Int}(
+                1 => mask[1],
+                2 => mask[4],
+                3 => mask[1],
+            )
+            @test @inferred(fun(3, 2, enc)) == Dict{Int,Int}(
+                1 => mask[1],
+                2 => mask[2],
+                3 => mask[3],
+            )
+            enc = LabelEnc.NativeLabels([:a, :b, :c])
+            @test @inferred(fun(:a, :b, enc)) == Dict{Symbol,Int}(
+                :a => mask[3],
+                :b => mask[2],
+                :c => mask[1],
+            )
+            @test @inferred(fun(:b, :b, enc)) == Dict{Symbol,Int}(
+                :a => mask[1],
+                :b => mask[4],
+                :c => mask[1],
+            )
+            @test @inferred(fun(:c, :b, enc)) == Dict{Symbol,Int}(
+                :a => mask[1],
+                :b => mask[2],
+                :c => mask[3],
+            )
+            enc = LabelEnc.OneOfK(3)
+            @test_throws ArgumentError fun(1, 1, enc)
+            @test_throws ArgumentError fun(1, [0,1], enc)
+            @test_throws ArgumentError fun([0,1], 1, enc)
+            @test_throws ArgumentError fun([0,1], [0,1], enc)
+            @test_throws ArgumentError fun([0 1], [0 1], enc)
         end
     end
 end
 
-# symbols
-# onevsrest
