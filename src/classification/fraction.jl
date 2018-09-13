@@ -8,7 +8,7 @@ aggregate_fraction(numerator, denominator, labels, ::AvgMode.None) =
     Dict(Pair.(labels, numerator ./ denominator))
 
 aggregate_fraction(numerator, denominator, labels, ::AvgMode.Macro) =
-    mean(broadcasted(/, numerator, denominator))
+    mean(Base.Broadcast.broadcasted(/, numerator, denominator))
 
 aggregate_fraction(numerator, denominator, labels, ::AvgMode.Micro) =
     sum(numerator) / sum(denominator)
@@ -77,7 +77,7 @@ end
 function reduce_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         encoding::BinaryLabelEncoding,
         avgmode::AvgMode.None)
@@ -96,7 +96,7 @@ end
 function reduce_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         encoding::LabelEncoding,
         avgmode::AverageMode)
@@ -105,10 +105,10 @@ function reduce_fraction(
     n = length(labels)
     numer = zeros(n); denom = zeros(n)
     ovr = [LabelEnc.OneVsRest(l) for l in labels]
-    @inbounds for i = 1:length(targets)
-        target = targets[i]
-        output = outputs[i]
-        for j = 1:n
+    @inbounds for I in eachindex(targets, outputs)
+        target = targets[I]
+        output = outputs[I]
+        for j in 1:n
             numer[j] += numer_fun(target, output, ovr[j])
             denom[j] += denom_fun(target, output, ovr[j])
         end
@@ -120,7 +120,7 @@ end
 function reduce_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         labels::AbstractVector,
         avgmode)
@@ -134,12 +134,12 @@ end
 function reduce_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         avgmode::AverageMode)
     reduce_fraction(numer_fun, denom_fun,
                     targets, outputs,
-                    comparemode(targets, outputs),
+                    _labelenc(targets, outputs),
                     avgmode)
 end
 
@@ -203,7 +203,7 @@ end
 function map_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         encoding::LabelEncoding,
         avgmode::AverageMode)
@@ -216,7 +216,7 @@ end
 function map_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         encoding::BinaryLabelEncoding,
         avgmode::AvgMode.None)
@@ -229,7 +229,7 @@ end
 function map_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         encoding::LabelEncoding,
         avgmode::AvgMode.None)
@@ -242,7 +242,7 @@ end
 function map_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         labels::AbstractVector,
         avgmode::AverageMode)
@@ -256,11 +256,11 @@ end
 function map_fraction(
         numer_fun::Function,
         denom_fun::Function,
-        targets::AbstractVector,
+        targets::AbstractArray,
         outputs::AbstractArray,
         avgmode::AverageMode)
     map_fraction(numer_fun, denom_fun,
                  targets, outputs,
-                 comparemode(targets, outputs),
+                 _labelenc(targets, outputs),
                  avgmode)
 end

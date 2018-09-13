@@ -251,7 +251,7 @@ end
         (y_true_sym2, y_hat_sym2, LabelEnc.OneVsRest(:a)),
     ]
     multiclass_data = [
-        (y_true_sym2, y_hat_sym2, LabelEnc.NativeLabels([:a,:b,:c])),
+        (y_true_sym2,    y_hat_sym2,  LabelEnc.NativeLabels([:a,:b,:c])),
         (y_true_c,          y_hat_c,  LabelEnc.Indices(3)),
         (Int32.(y_true_c),  y_hat_c,  LabelEnc.Indices(3)),
         (y_true_c, Float32.(y_hat_c), LabelEnc.Indices(3)),
@@ -259,8 +259,7 @@ end
     for (fun, ref) in fun_refs_arrays
         @testset "$fun: binary" begin
             for (target, output, enc) in binary_data
-                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc)" begin
-
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc))" begin
                     @test @inferred(fun(target, output, enc)) === ref
                     if nlabel(target) == 2
                         @test fun(target, output) === ref
@@ -272,7 +271,7 @@ end
         end
         @testset "$fun: multiclass" begin
             for (target, output, enc) in multiclass_data
-                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc)" begin
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc))" begin
                     res = Dict(map(label(enc)) do l
                         l => fun(target, output, LabelEnc.OneVsRest(l))
                     end)

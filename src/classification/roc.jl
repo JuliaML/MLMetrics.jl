@@ -83,7 +83,7 @@ end
 
 # Generic fallback. Tries to infer label encoding
 function confusions(targets, outputs)
-    encoding = comparemode(targets, outputs)
+    encoding = _labelenc(targets, outputs)
     nlabel(encoding) == 2 || error("Multiclass not yet implemented")
     confusions(targets, outputs, encoding)
 end

@@ -79,7 +79,8 @@ export
     matthews_corrcoef
 
 include("averagemode.jl")
-include("classification/utils.jl")
+include("classification/upstream.jl")
+include("classification/misc.jl")
 include("classification/counts.jl")
 include("classification/fraction.jl")
 include("classification/metrics.jl")

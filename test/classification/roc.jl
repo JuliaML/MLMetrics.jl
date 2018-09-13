@@ -1,4 +1,3 @@
-
 @testset "BinaryConfusionMatrix" begin
     cm = @inferred MLMetrics.BinaryConfusionMatrix()
     cm isa MLMetrics.BinaryConfusionMatrix{Int}

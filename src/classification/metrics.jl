@@ -1,19 +1,47 @@
 # --------------------------------------------------------------------
 # prevalence is a bit of an outlier
 
-"""
-    prevalence(targets, outputs, [encoding]) -> Float64
-
+@reduce_fraction """
 Return the fraction of positive observations in `targets`.
 What constitutes as positive depends on `encoding`.
-"""
-prevalence(targets, outputs, encoding::BinaryLabelEncoding) =
-    condition_positive(targets, outputs, encoding) / length(targets)
+
+```jldoctest
+julia> prevalence([0,1,1,0,1], [1,1,1,0,1])
+0.6
+
+julia> prevalence([-1,1,1,-1,1], [1,1,1,-1,1])
+0.6
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> prevalence([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], LabelEnc.OneVsRest(:c))
+0.4
+```
+
+The optional (keyword) parameter `avgmode` can be used to specify
+if and how class-specific results should be aggregated (default:
+none). Note though that this functionality is mainly provided for
+interface consistency.
+
+```jldoctest
+julia> prevalence([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c]) # avgmode=:none
+Dict{Symbol,Float64} with 3 entries:
+  :a => 0.4
+  :b => 0.2
+  :c => 0.4
+
+julia> prevalence([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:micro)
+0.3333333333333333
+```
+""" ->
+prevalence := condition_positive / _length_targets
 
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of positive predicted outcomes in `outputs`
+Return the fraction of positive predicted outcomes in `outputs`
 that are true positives according to the correspondig `targets`.
 This is also known as "precision" (alias `precision_score`).
 
@@ -55,7 +83,7 @@ const precision_score = positive_predictive_value
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of negative predicted outcomes in `outputs`
+Return the fraction of negative predicted outcomes in `outputs`
 that are true negatives according to the corresponding `targets`.
 
 ```jldoctest
@@ -94,7 +122,7 @@ negative_predictive_value := true_negatives / predicted_condition_negative
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of positive predicted outcomes in `outputs`
+Return the fraction of positive predicted outcomes in `outputs`
 that are false positives according to the corresponding
 `targets`.
 
@@ -134,7 +162,7 @@ false_discovery_rate := false_positives / predicted_condition_positive
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of negative predicted outcomes in `outputs`
+Return the fraction of negative predicted outcomes in `outputs`
 that are false negatives according to the corresponding
 `targets`.
 
@@ -174,7 +202,7 @@ false_omission_rate := false_negatives / predicted_condition_negative
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of truly positive observations in `outputs`
+Return the fraction of truly positive observations in `outputs`
 that were predicted as positives. What constitutes "truly
 positive" depends on to the corresponding `targets`. This is also
 known as `recall` or `sensitivity`.
@@ -218,7 +246,7 @@ const recall = true_positive_rate
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of truly negative observations in `outputs`
+Return the fraction of truly negative observations in `outputs`
 that were (wrongly) predicted as positives. What constitutes
 "truly negative" depends on to the corresponding `targets`.
 
@@ -258,7 +286,7 @@ false_positive_rate := false_positives / condition_negative
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of truely positive observations that were
+Return the fraction of truely positive observations that were
 (wrongly) predicted as negative. What constitutes "truly
 positive" depends on to the corresponding `targets`.
 
@@ -298,7 +326,7 @@ false_negative_rate := false_negatives / condition_positive
 # --------------------------------------------------------------------
 
 @reduce_fraction """
-Returns the fraction of negative predicted outcomes that are true
+Return the fraction of negative predicted outcomes that are true
 negatives according to the corresponding `targets`. This is also
 known as `specificity`.
 
@@ -405,7 +433,7 @@ end
 function accuracy(targets::AbstractVector,
                   outputs::AbstractArray;
                   normalize = true)
-    accuracy(targets, outputs, comparemode(targets, outputs), normalize = normalize)::Float64
+    accuracy(targets, outputs, _labelenc(targets, outputs), normalize = normalize)::Float64
 end
 
 # --------------------------------------------------------------------
@@ -517,10 +545,10 @@ f_score(targets, outputs, labels::AbstractVector, args...) =
     f_score(targets, outputs, LabelEnc.NativeLabels(labels), args...)
 
 f_score(targets, outputs, β::Number = 1.0) =
-    f_score(targets, outputs, comparemode(targets, outputs), AvgMode.None(), β)
+    f_score(targets, outputs, _labelenc(targets, outputs), AvgMode.None(), β)
 
 f_score(targets, outputs, avgmode::AverageMode, β::Number = 1.0) =
-    f_score(targets, outputs, comparemode(targets, outputs), avgmode, β)
+    f_score(targets, outputs, _labelenc(targets, outputs), avgmode, β)
 
 """
     f1_score(targets, outputs, [encoding], [avgmode])

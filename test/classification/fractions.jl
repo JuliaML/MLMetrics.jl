@@ -1,4 +1,4 @@
-@testset "test that synonyms work"  begin
+@testset "test that synonyms work" begin
     @test precision_score === positive_predictive_value
     @test sensitivity === true_positive_rate
     @test recall === true_positive_rate

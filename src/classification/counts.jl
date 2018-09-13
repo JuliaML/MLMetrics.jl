@@ -115,6 +115,12 @@ incorrectly_classified(target, output, encoding::BinaryLabelEncoding) =
 const misclassified = incorrectly_classified
 
 # --------------------------------------------------------------------
+
+# only for internal use to define `prevalence`
+_length_targets(target, output, encoding) = 1
+_length_targets(target::AbstractArray, output, encoding) = length(targets)
+
+# --------------------------------------------------------------------
 # Generate common fallback functions
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
@@ -131,7 +137,7 @@ for fun in (:true_positives,  :true_negatives,
 
     # Generic fallback. Tries to infer label encoding
     @eval function ($fun)(targets, outputs)
-        encoding = comparemode(targets, outputs)
+        encoding = _labelenc(targets, outputs)
         ($fun)(targets, outputs, encoding)
     end
 
