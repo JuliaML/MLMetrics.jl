@@ -26,9 +26,8 @@ export
     correctly_classified,
     incorrectly_classified, misclassified,
 
+    # class metrics
     prevalence,
-
-    # multiclass support
     positive_predictive_value, precision_score,
     negative_predictive_value,
     false_discovery_rate,
@@ -49,6 +48,7 @@ export
     accuracy_at_sensitivity,
     auc, auc_from_rates,
 
+    # regression
     absolute_error,
     percent_error,
     log_error,
