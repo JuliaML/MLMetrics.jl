@@ -9,9 +9,9 @@ ambs = detect_ambiguities(MLMetrics, Base, Core)
 @test Set(setdiff(ambs, refambs)) == Set{Tuple{Method,Method}}()
 
 classification_tests = joinpath.("classification", [
-    "counts.jl",
+#   "counts.jl",
 #   "roc.jl",
-#   "fractions.jl",
+    "metrics.jl",
 ])
 
 for test in classification_tests

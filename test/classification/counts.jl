@@ -259,7 +259,7 @@ end
     for (fun, ref) in fun_refs_arrays
         @testset "$fun: binary" begin
             for (target, output, enc) in binary_data
-                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc))" begin
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(typeof(enc)))" begin
                     @test @inferred(fun(target, output, enc)) === ref
                     if nlabel(target) == 2
                         @test fun(target, output) === ref
@@ -271,7 +271,7 @@ end
         end
         @testset "$fun: multiclass" begin
             for (target, output, enc) in multiclass_data
-                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(enc))" begin
+                @testset "$(eltype(target)) against $(eltype(output)) (enc: $(typeof(enc)))" begin
                     res = Dict(map(label(enc)) do l
                         l => fun(target, output, LabelEnc.OneVsRest(l))
                     end)

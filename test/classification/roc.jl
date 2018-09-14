@@ -87,3 +87,45 @@ end
     @test @inferred(accuracy_at_sensitivity(r, 0)) == 0.55
     @test @inferred(accuracy_at_sensitivity(r, 1.)) == 0.7
 end
+
+_accuracy_nonorm(args...) = accuracy(args...; normalize=false)
+for (fun, ref) = ((true_positives,  5),
+                  (true_negatives,  4),
+                  (false_positives, 3),
+                  (false_negatives, 5),
+                  (prevalence, 10/17),
+                  (condition_positive, 10),
+                  (condition_negative, 7),
+                  (predicted_condition_positive, 8),
+                  (predicted_condition_negative, 9),
+                  (f_score, 0.5555555555555556),
+                  (f1_score, 0.5555555555555556),
+                  (accuracy, 9/17),
+                  (_accuracy_nonorm, 9.),
+                  (positive_predictive_value, 5/8),
+                  (false_discovery_rate, 3/8),
+                  (negative_predictive_value, 4/9),
+                  (false_omission_rate, 5/9),
+                  (true_positive_rate, 5/10),
+                  (false_positive_rate, 3/7),
+                  (false_negative_rate, 5/10),
+                  (true_negative_rate, 4/7),
+                  (positive_likelihood_ratio, 5/10 * 7/3),
+                  (negative_likelihood_ratio, 5/10 * 7/4),
+                  (diagnostic_odds_ratio, (5/10 * 7/3) / (5/10 * 7/4)))
+   @testset "$fun: check against known result" begin
+        for target in targets, output in outputs
+            @testset "$(typeof(target)) against $(typeof(output))" begin
+                cm = @inferred confusions(target, output, FuzzyBinary())
+                @test cm isa MLMetrics.BinaryConfusionMatrix
+                @test @inferred(fun(cm)) ≈ ref
+            end
+        end
+        cm1 = @inferred confusions(y_true_symb, y_hat_symb)
+        cm2 = @inferred confusions(y_true_symb, y_hat_symb, [:pos, :neg])
+        cm3 = @inferred confusions(y_true_symb, y_hat_symb, LabelEnc.NativeLabels([:pos, :neg]))
+        @test cm1 === cm2
+        @test cm1 === cm3
+        @test @inferred(fun(cm1)) ≈ ref
+    end
+end

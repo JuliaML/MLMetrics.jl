@@ -366,206 +366,7 @@ true_negative_rate := true_negatives / condition_negative
 const specificity = true_negative_rate
 
 # --------------------------------------------------------------------
-
-"""
-    accuracy(targets, outputs, [encoding]; [normalize = true]) -> Float64
-
-Compute the classification accuracy for the `outputs` given the
-`targets`. If `normalize` is `true`, the fraction of correctly
-classified observations in `outputs` is returned (according to
-`encoding`). Otherwise the total number is returned.
-
-```jldoctest
-julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c])
-0.6
-
-julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], normalize=false)
-3.0
-```
-
-$ENCODING_DESCR
-
-```jldoctest
-julia> accuracy([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
-0.8
-```
-"""
-function accuracy(targets::AbstractVector,
-                  outputs::AbstractArray,
-                  encoding::BinaryLabelEncoding;
-                  normalize = true)
-    @_dimcheck length(targets) == length(outputs)
-    tp::Int = 0; tn::Int = 0
-    @inbounds for i = 1:length(targets)
-        target = targets[i]
-        output = outputs[i]
-        tp += true_positives(target, output, encoding)
-        tn += true_negatives(target, output, encoding)
-    end
-    correct = tp + tn
-    normalize ? Float64(correct/length(targets)) : Float64(correct)
-end
-
-function accuracy(object; normalize = true)
-    correct = true_positives(object) + true_negatives(object)
-    normalize ? Float64(correct/nobs(object)) : Float64(correct)
-end
-
-function accuracy(targets::AbstractVector,
-                  outputs::AbstractArray,
-                  encoding::LabelEncoding;
-                  normalize = true)
-    @_dimcheck length(targets) == length(outputs)
-    correct::Int = 0
-    @inbounds for i = 1:length(targets)
-        correct += targets[i] == outputs[i]
-    end
-    normalize ? Float64(correct/length(targets)) : Float64(correct)
-end
-
-function accuracy(targets::AbstractVector,
-                  outputs::AbstractArray,
-                  labels::AbstractVector;
-                  normalize = true)
-    accuracy(targets, outputs, LabelEnc.NativeLabels(labels), normalize = normalize)::Float64
-end
-
-function accuracy(targets::AbstractVector,
-                  outputs::AbstractArray;
-                  normalize = true)
-    accuracy(targets, outputs, _labelenc(targets, outputs), normalize = normalize)::Float64
-end
-
-# --------------------------------------------------------------------
-
-"""
-    f_score(targets, outputs, [encoding], [avgmode], [β = 1]) -> Float64
-
-Compute the F-score for the `outputs` given the `targets`.
-The F-score is a measure for accessing the quality of binary
-predictor by considering both *recall* and the *precision*.
-
-```jldoctest
-julia> recall([1,0,0,1,1], [1,0,0,0,1])
-0.6666666666666666
-
-julia> precision_score([1,0,0,1,1], [1,0,0,0,1])
-1.0
-
-julia> f_score([1,0,0,1,1], [1,0,0,0,1])
-0.8
-```
-
-The parameter `β` can be used to balance the importance of recall
-vs precision. The default `β = 1` corresponds to the harmonic
-mean. A value of `β > 1` weighs recall higher than precision,
-while a value of `β < 1` weighs recall lower than precision.
-
-```jldoctest
-julia> f_score([1,0,0,1,1], [1,0,0,0,1], 2)
-0.7142857142857143
-
-julia> f_score([1,0,0,1,1], [1,0,0,0,1], 0.5)
-0.9090909090909091
-```
-
-$ENCODING_DESCR
-
-```jldoctest
-julia> f_score([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
-0.8
-```
-"""
-function f_score(targets::AbstractVector,
-                 outputs::AbstractArray,
-                 encoding::BinaryLabelEncoding,
-                 β::Number = 1.0)
-    @_dimcheck length(targets) == length(outputs)
-    β² = abs2(β)
-    tp::Int = 0; fp::Int = 0; fn::Int = 0
-    @inbounds for i = 1:length(targets)
-        target = targets[i]
-        output = outputs[i]
-        tp += true_positives(target,  output, encoding)
-        fp += false_positives(target, output, encoding)
-        fn += false_negatives(target, output, encoding)
-    end
-    (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
-end
-
-function f_score(object, β::Number = 1.0)
-    β² = abs2(β)
-    tp = true_positives(object)
-    fp = false_positives(object)
-    fn = false_negatives(object)
-    (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
-end
-
-# Micro averaging multiclass f-score
-function f_score(targets::AbstractVector,
-                 outputs::AbstractArray,
-                 encoding::LabelEncoding,
-                 avgmode::AvgMode.Micro,
-                 β::Number = 1.0)
-    r = true_positive_rate(targets, outputs, avgmode = avgmode)
-    p = positive_predictive_value(targets, outputs, avgmode = avgmode)
-    β² = abs2(β)
-    ((1+β²)*(p*r)) / (β²*(p+r))
-end
-
-# Macro averaging multiclass f-score
-function f_score(targets::AbstractVector,
-                 outputs::AbstractArray,
-                 encoding::LabelEncoding,
-                 avgmode::AverageMode,
-                 β::Number = 1.0)
-    @_dimcheck length(targets) == length(outputs)
-    labels = label(encoding)
-    n = length(labels)
-    ovr = [LabelEnc.OneVsRest(l) for l in labels]
-    precision_ = zeros(n)
-    recall_ = zeros(n)
-    @inbounds for j = 1:n
-        recall_[j] = true_positive_rate(targets, outputs, ovr[j])
-        precision_[j] = positive_predictive_value(targets, outputs, ovr[j])
-    end
-    β² = abs2(β)
-    scores = ((1.0 .+ β²) .* (precision_ .* recall_)) ./ (β² .* (precision_ .+ recall_))
-    aggregate_score(scores, labels, avgmode)
-end
-
-function f_score(targets::AbstractVector,
-                 outputs::AbstractArray,
-                 encoding::LabelEncoding,
-                 β::Number = 1.0)
-    f_score(targets, outputs, encoding, AvgMode.None(), β)
-end
-
-f_score(targets, outputs, labels::AbstractVector, args...) =
-    f_score(targets, outputs, LabelEnc.NativeLabels(labels), args...)
-
-f_score(targets, outputs, β::Number = 1.0) =
-    f_score(targets, outputs, _labelenc(targets, outputs), AvgMode.None(), β)
-
-f_score(targets, outputs, avgmode::AverageMode, β::Number = 1.0) =
-    f_score(targets, outputs, _labelenc(targets, outputs), avgmode, β)
-
-"""
-    f1_score(targets, outputs, [encoding], [avgmode])
-
-Same as [`f_score`](@ref), but with `β` fixed to 1.
-"""
-f1_score(targets, outputs) = f_score(targets, outputs, 1.0)
-f1_score(object) = f_score(object, 1.0)
-f1_score(targets, outputs, enc::LabelEncoding) = f_score(targets, outputs, enc, 1.0)
-f1_score(targets, outputs, avgmode::AverageMode) = f_score(targets, outputs, avgmode)
-f1_score(targets, outputs, enc::LabelEncoding, avgmode::AverageMode) = f_score(targets, outputs, enc, avgmode, 1.0)
-
-aggregate_score(score, labels, ::AvgMode.None) = Dict(Pair.(labels, score))
-aggregate_score(score, labels, ::AvgMode.Macro) = mean(score)
-aggregate_score(score, labels, ::AvgMode.Micro) = error("AvgMode.Micro is undetermined.")
-
-# --------------------------------------------------------------------
+# MAP FRACTION
 
 @map_fraction """
 Compute the positive likelihood ratio for the given `outputs` and
@@ -690,6 +491,226 @@ julia> diagnostic_odds_ratio([:b,:b,:a,:c,:c], [:a,:b,:b,:c,:c], avgmode=:macro)
 """ ->
 diagnostic_odds_ratio := positive_likelihood_ratio / negative_likelihood_ratio
 # FIXME: maybe check if both false negatives and false positives are zero
+
+# --------------------------------------------------------------------
+
+"""
+    accuracy(targets, outputs, [encoding]; [normalize = true]) -> Float64
+
+Compute the classification accuracy for the `outputs` given the
+`targets`. If `normalize` is `true`, the fraction of correctly
+classified observations in `outputs` is returned (according to
+`encoding`). Otherwise the total number is returned.
+
+```jldoctest
+julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c])
+0.6
+
+julia> accuracy([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], normalize=false)
+3.0
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> accuracy([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
+0.8
+```
+"""
+function accuracy(targets::AbstractArray,
+                  outputs::AbstractArray,
+                  encoding::BinaryLabelEncoding;
+                  normalize = true)
+    @_dimcheck length(targets) == length(outputs)
+    tp::Int = 0; tn::Int = 0
+    @inbounds for i = 1:length(targets)
+        target = targets[i]
+        output = outputs[i]
+        tp += true_positives(target, output, encoding)
+        tn += true_negatives(target, output, encoding)
+    end
+    correct = tp + tn
+    normalize ? Float64(correct/length(targets)) : Float64(correct)
+end
+
+function accuracy(object; normalize = true)
+    correct = true_positives(object) + true_negatives(object)
+    normalize ? Float64(correct/nobs(object)) : Float64(correct)
+end
+
+function accuracy(targets::AbstractArray,
+                  outputs::AbstractArray,
+                  encoding::LabelEncoding;
+                  normalize = true)
+    @_dimcheck length(targets) == length(outputs)
+    correct::Int = 0
+    @inbounds for i = 1:length(targets)
+        correct += targets[i] == outputs[i]
+    end
+    normalize ? Float64(correct/length(targets)) : Float64(correct)
+end
+
+function accuracy(targets::AbstractArray,
+                  outputs::AbstractArray,
+                  labels::AbstractVector;
+                  normalize = true)
+    accuracy(targets, outputs, LabelEnc.NativeLabels(labels), normalize = normalize)::Float64
+end
+
+function accuracy(targets::AbstractArray,
+                  outputs::AbstractArray;
+                  normalize = true)
+    accuracy(targets, outputs, _labelenc(targets, outputs), normalize = normalize)::Float64
+end
+
+# --------------------------------------------------------------------
+
+"""
+    f_score(targets, outputs, [encoding], [avgmode], [β = 1]) -> Float64
+
+Compute the F-score for the `outputs` given the `targets`.
+The F-score is a measure for accessing the quality of binary
+predictor by considering both *recall* and the *precision*.
+
+```jldoctest
+julia> recall([1,0,0,1,1], [1,0,0,0,1])
+0.6666666666666666
+
+julia> precision_score([1,0,0,1,1], [1,0,0,0,1])
+1.0
+
+julia> f_score([1,0,0,1,1], [1,0,0,0,1])
+0.8
+```
+
+The parameter `β` can be used to balance the importance of recall
+vs precision. The default `β = 1` corresponds to the harmonic
+mean. A value of `β > 1` weighs recall higher than precision,
+while a value of `β < 1` weighs recall lower than precision.
+
+```jldoctest
+julia> f_score([1,0,0,1,1], [1,0,0,0,1], 2)
+0.7142857142857143
+
+julia> f_score([1,0,0,1,1], [1,0,0,0,1], 0.5)
+0.9090909090909091
+```
+
+$ENCODING_DESCR
+
+```jldoctest
+julia> f_score([1,0,0,1,1], [1,-1,-1,-1,1], LabelEnc.FuzzyBinary())
+0.8
+```
+"""
+function f_score(targets::AbstractArray,
+                 outputs::AbstractArray,
+                 encoding::BinaryLabelEncoding,
+                 avgmode::AvgMode.None,
+                 β::Number = 1.0)
+    @_dimcheck length(targets) == length(outputs)
+    β² = abs2(β)
+    tp::Int = 0; fp::Int = 0; fn::Int = 0
+    @inbounds for I in eachindex(targets, outputs)
+        target = targets[I]
+        output = outputs[I]
+        tp += true_positives(target,  output, encoding)
+        fp += false_positives(target, output, encoding)
+        fn += false_negatives(target, output, encoding)
+    end
+    (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
+end
+
+f_score(object; beta = 1.0) = f_score(object, beta)
+function f_score(object, β::Number)
+    β² = abs2(β)
+    tp = true_positives(object)
+    fp = false_positives(object)
+    fn = false_negatives(object)
+    (1+β²)*tp / ((1+β²)*tp + β²*fn + fp)
+end
+
+# Micro averaging multiclass f-score
+function f_score(targets::AbstractArray,
+                 outputs::AbstractArray,
+                 encoding::LabelEncoding,
+                 avgmode::AvgMode.Micro,
+                 β::Number = 1.0)
+    r = true_positive_rate(targets, outputs, encoding, avgmode)
+    p = positive_predictive_value(targets, outputs, encoding, avgmode)
+    β² = abs2(β)
+    ((1+β²)*(p*r)) / (β²*(p+r))
+end
+
+# Macro averaging multiclass f-score
+function f_score(targets::AbstractArray,
+                 outputs::AbstractArray,
+                 encoding::LabelEncoding,
+                 avgmode::AverageMode,
+                 β::Number = 1.0)
+    @_dimcheck length(targets) == length(outputs)
+    labels = label(encoding)
+    n = length(labels)
+    ovr = [LabelEnc.OneVsRest(l) for l in labels]
+    precision_ = zeros(n); recall_ = zeros(n)
+    @inbounds for j = 1:n
+        recall_[j] = true_positive_rate(targets, outputs, ovr[j])
+        precision_[j] = positive_predictive_value(targets, outputs, ovr[j])
+    end
+    β² = abs2(β)
+    scores = ((1.0 .+ β²) .* (precision_ .* recall_)) ./ (β² .* (precision_ .+ recall_))
+    scores .= ifelse.(isequal.(scores, NaN), zero(eltype(scores)), scores)
+    aggregate_score(scores, labels, avgmode)
+end
+
+aggregate_score(score, labels, ::AvgMode.None) = Dict(Pair.(labels, score))
+aggregate_score(score, labels, ::AvgMode.Macro) = mean(score)
+aggregate_score(score, labels, ::AvgMode.Micro) = error("unreachable")
+
+f_score(targets, outputs, encoding::LabelEncoding, β::Number) =
+    f_score(targets, outputs, encoding, AvgMode.None(), β)
+
+f_score(targets, outputs, labels::AbstractVector, args...) =
+    f_score(targets, outputs, LabelEnc.NativeLabels(labels), args...)
+
+f_score(targets, outputs, β::Number) =
+    f_score(targets, outputs, _labelenc(targets, outputs), AvgMode.None(), β)
+
+f_score(targets, outputs, avgmode::AverageMode, β::Number = 1.0) =
+    f_score(targets, outputs, _labelenc(targets, outputs), avgmode, β)
+
+f_score(targets, outputs; avgmode=AvgMode.None(), beta::Number = 1.0) =
+    f_score(targets, outputs, convert(AverageMode, avgmode), beta)
+
+f_score(targets, outputs, encoding; avgmode=AvgMode.None(), beta::Number = 1.0) =
+    f_score(targets, outputs, encoding, convert(AverageMode, avgmode), beta)
+
+# --------------------------------------------------------------------
+
+"""
+    f1_score(targets, outputs, [encoding], [avgmode])
+
+Same as [`f_score`](@ref), but with `β` fixed to 1.
+"""
+f1_score(object) = f_score(object, 1.0)
+
+f1_score(targets, outputs, enc::LabelEncoding) =
+    f_score(targets, outputs, enc, 1.0)
+
+f1_score(targets, outputs, labels::AbstractVector, args...) =
+    f_score(targets, outputs, labels, args..., 1.0)
+
+f1_score(targets, outputs, avgmode::AverageMode) =
+    f_score(targets, outputs, avgmode, 1.0)
+
+f1_score(targets, outputs, enc::LabelEncoding, avgmode::AverageMode) =
+    f_score(targets, outputs, enc, avgmode, 1.0)
+
+f1_score(targets, outputs, enc; avgmode=AvgMode.None()) =
+    f_score(targets, outputs, enc, convert(AverageMode, avgmode), 1.0)
+
+f1_score(targets, outputs; avgmode=AvgMode.None()) =
+    f_score(targets, outputs, convert(AverageMode, avgmode), 1.0)
 
 # --------------------------------------------------------------------
 

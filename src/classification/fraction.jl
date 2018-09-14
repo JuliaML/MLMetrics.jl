@@ -123,7 +123,7 @@ function reduce_fraction(
         targets::AbstractArray,
         outputs::AbstractArray,
         labels::AbstractVector,
-        avgmode)
+        avgmode::AverageMode)
     reduce_fraction(numer_fun, denom_fun,
                     targets, outputs,
                     LabelEnc.NativeLabels(labels),

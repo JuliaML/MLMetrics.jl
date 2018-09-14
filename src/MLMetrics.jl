@@ -78,7 +78,7 @@ export
     diagnostic_odds_ratio,
     matthews_corrcoef
 
-include("averagemode.jl")
+include("classification/averagemode.jl")
 include("classification/upstream.jl")
 include("classification/misc.jl")
 include("classification/counts.jl")
