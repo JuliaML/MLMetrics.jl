@@ -17,40 +17,57 @@
     @test cm3 == [6 10; 8 12]
 end
 
+y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
+y_true_m = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1]
+y_true_i = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2]
+y_true_b = Vector{Bool}(y_true_p)
+y_true_pf = Vector{Float64}(y_true_p)
+y_true_mf = Vector{Float64}(y_true_m)
+targets = [y_true_p, y_true_m, y_true_b, y_true_pf, y_true_mf]
+
+y_hat_p  = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+y_hat_m  = [1, 1,-1,-1, 1,-1, 1,-1,-1, 1,-1, 1,-1, 1,-1, 1,-1]
+y_hat_i  = [1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 1, 2]
+y_hat_b  = Vector{Bool}(y_hat_p)
+y_hat_pf = Vector{Float64}(y_hat_p)
+y_hat_mf = Vector{Float64}(y_hat_m)
+outputs = [y_hat_p, y_hat_m, y_hat_b, y_hat_pf, y_hat_mf, y_hat_b']
+
+y_true_sym = convertlabel([:pos,:neg], y_true_p, LabelEnc.ZeroOne())
+y_true_roc2 = [1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0]
+
+y_hat_sym  = convertlabel([:pos,:neg], y_hat_p,  LabelEnc.ZeroOne())
+y_hat_roc = [.9, 1, 0, .4, .5, .4, .7, .1, .15, .95, .3, .6, .2, .9, .05, .8, .48]
+y_hat_roc2 = [20, 19, 18, 17, 16, 15, 14, 13, 11.5, 11.5, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] ./ 20
+
+
 @testset "ROCCurve" begin
-    y_true_p = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0]
-    y_true_m = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1]
-    y_true_b = Vector{Bool}(y_true_p)
-    y_true_pf = Vector{Float64}(y_true_p)
-    y_true_mf = Vector{Float64}(y_true_m)
-    targets = (y_true_p, y_true_m, y_true_b, y_true_pf, y_true_mf)
-    y_hat_p  = [1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0]
-    y_hat_roc = [.9, 1, 0, .4, .5, .4, .7, .1, .15, .95, .3, .6, .2, .9, .05, .8, .48]
-    y_true_symb = convertlabel([:pos,:neg], y_true_p, LabelEnc.ZeroOne())
-    y_hat_symb  = convertlabel([:pos,:neg], y_hat_p,  LabelEnc.ZeroOne())
-    y_true_roc2 = [1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0]
-    y_hat_roc2 = [20, 19, 18, 17, 16, 15, 14, 13, 11.5, 11.5, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1] ./ 20
     @testset "explicit number of thresholds" begin
-        r = @inferred roc(y_true_symb, y_hat_roc, 10)
+        r = @inferred roc(y_true_sym, y_hat_roc, thresholds=10)
         @test length(r) == 10
     end
     @testset "constructor and show" begin
-        r = @inferred roc(y_true_symb, y_hat_roc)
+        r = @inferred roc(y_true_sym, y_hat_roc)
+        @test r == @inferred roc(y_true_sym, y_hat_roc, thresholds=100)
+        @test r == @inferred roc(y_true_sym, y_hat_roc, [:pos,:neg])
+        @test r == @inferred roc(y_true_sym, y_hat_roc, [:pos,:neg], thresholds=100)
+        @test r == @inferred roc(y_true_sym, y_hat_roc, LabelEnc.NativeLabels([:pos,:neg]))
+        @test r == @inferred roc(y_true_sym, y_hat_roc, LabelEnc.NativeLabels([:pos,:neg]), thresholds=100)
         @test r isa MLMetrics.ROCCurve
         @test r isa AbstractVector
         @test length(r) == 100
         @test_reference "references/ROCCurve1.txt" @io2str show(::IO, r)
         @test_reference "references/ROCCurve2.txt" @io2str show(::IO, MIME"text/plain"(), r)
-        r = @inferred roc(y_true_roc2, y_hat_roc2, collect(r.thresholds))
+        r = @inferred roc(y_true_roc2, y_hat_roc2, thresholds=collect(r.thresholds))
         @test_reference "references/ROCCurve3.txt" @io2str show(::IO, MIME"text/plain"(), r)
     end
     @testset "getindex and setindex!" begin
-        r = @inferred roc(y_true_symb, y_hat_roc)
+        r = @inferred roc(y_true_sym, y_hat_roc)
         @test @inferred(r[1]) == (1.0, [1 9; 0 7])
         @test r[1][2] isa MLMetrics.BinaryConfusionMatrix
         @test precision_score(r) == precision_score.(r.confusions)
         # setindex
-        r = @inferred roc(y_true_symb, y_hat_roc, collect(r.thresholds))
+        r = @inferred roc(y_true_sym, y_hat_roc, thresholds=collect(r.thresholds))
         r[1] = MLMetrics.BinaryConfusionMatrix([1 2; 3 4])
         @test r[1] == (1.0, [1 2; 3 4])
         r[1] = (1.1, MLMetrics.BinaryConfusionMatrix([5 6; 7 8]))
@@ -58,7 +75,7 @@ end
     end
     @testset "compare against pROC" begin
         # pROC says 0.5357
-        r = @inferred roc(y_true_symb, y_hat_roc)
+        r = @inferred roc(y_true_sym, y_hat_roc)
         @test @inferred(auc(r)) ≈ 0.5357142857142858
         # pROC says 0.825
         r = @inferred roc(y_true_roc2, y_hat_roc2)
@@ -66,12 +83,12 @@ end
         @test @inferred(auc(y_true_roc2, y_hat_roc2)) ≈ 0.825
     end
     @testset "different array eltypes" begin
-        r = @inferred roc(y_true_symb, y_hat_roc)
+        r = @inferred roc(y_true_sym, y_hat_roc)
         for target in targets
             @test @inferred(roc(target, y_hat_roc)) == r
             @test @inferred(roc(target, y_hat_roc, LabelEnc.ZeroOne())) == r
-            @test @inferred(roc(target, y_hat_roc, 100)) == r
-            @test @inferred(roc(target, y_hat_roc, 100, LabelEnc.ZeroOne())) == r
+            @test @inferred(roc(target, y_hat_roc, thresholds=100)) == r
+            @test @inferred(roc(target, y_hat_roc, LabelEnc.ZeroOne(), thresholds=100)) == r
         end
     end
     r = @inferred roc(y_true_roc2, y_hat_roc2)
@@ -98,6 +115,8 @@ for (fun, ref) = ((true_positives,  5),
                   (condition_negative, 7),
                   (predicted_condition_positive, 8),
                   (predicted_condition_negative, 9),
+                  (correctly_classified, 9),
+                  (incorrectly_classified, 8),
                   (f_score, 0.5555555555555556),
                   (f1_score, 0.5555555555555556),
                   (accuracy, 9/17),
@@ -116,14 +135,14 @@ for (fun, ref) = ((true_positives,  5),
    @testset "$fun: check against known result" begin
         for target in targets, output in outputs
             @testset "$(typeof(target)) against $(typeof(output))" begin
-                cm = @inferred confusions(target, output, FuzzyBinary())
+                cm = @inferred confusions(target, output, LabelEnc.FuzzyBinary())
                 @test cm isa MLMetrics.BinaryConfusionMatrix
                 @test @inferred(fun(cm)) ≈ ref
             end
         end
-        cm1 = @inferred confusions(y_true_symb, y_hat_symb)
-        cm2 = @inferred confusions(y_true_symb, y_hat_symb, [:pos, :neg])
-        cm3 = @inferred confusions(y_true_symb, y_hat_symb, LabelEnc.NativeLabels([:pos, :neg]))
+        cm1 = @inferred confusions(y_true_sym, y_hat_sym)
+        cm2 = @inferred confusions(y_true_sym, y_hat_sym, [:pos, :neg])
+        cm3 = @inferred confusions(y_true_sym, y_hat_sym, LabelEnc.NativeLabels([:pos, :neg]))
         @test cm1 === cm2
         @test cm1 === cm3
         @test @inferred(fun(cm1)) ≈ ref

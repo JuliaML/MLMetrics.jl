@@ -26,9 +26,6 @@ y_hat_mf = Vector{Float64}(y_hat_m)
 y_hat_sym  = convertlabel([:pos,:neg], y_hat_p,  LabelEnc.ZeroOne())
 y_hat_sym2  = [:a, :a, :b, :c, :a, :b, :a, :c, :c, :a, :c, :a, :c, :a, :b, :a, :c]
 y_hat_c  = [1, 1, 2, 3, 1, 2, 1, 3, 3, 1, 3, 1, 3, 1, 2, 1, 3]
-# f1 macro: 0.25925925925925924
-# f1 micro: 0.35294117647058826
-# f1 none: array([0.55555556, 0., 0.22222222])
 
 _accuracy_nonorm(args...) = accuracy(args...; normalize=false)
 # (fun, binary, micro, macro)

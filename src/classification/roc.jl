@@ -44,6 +44,10 @@ predicted_condition_positive(c::BinaryConfusionMatrix) =
     true_positives(c) + false_positives(c)
 predicted_condition_negative(c::BinaryConfusionMatrix) =
     true_negatives(c) + false_negatives(c)
+correctly_classified(c::BinaryConfusionMatrix) =
+    true_positives(c) + true_negatives(c)
+incorrectly_classified(c::BinaryConfusionMatrix) =
+    false_positives(c) + false_negatives(c)
 prevalence(c::BinaryConfusionMatrix) =
     condition_positive(c) / nobs(c)
 
@@ -94,9 +98,9 @@ function confusions(targets::AbstractArray,
     @_dimcheck length(targets) == length(outputs)
     tp::Int = 0; tn::Int = 0;
     fp::Int = 0; fn::Int = 0;
-    @inbounds for i in 1:length(targets)
-        target = targets[i]
-        output = outputs[i]
+    @inbounds for I in eachindex(targets, outputs)
+        target = targets[I]
+        output = outputs[I]
         tp +=  true_positives(target, output, encoding)
         fp += false_positives(target, output, encoding)
         fn += false_negatives(target, output, encoding)
@@ -107,13 +111,13 @@ end
 
 function confusions(targets::AbstractArray,
                     outputs::AbstractArray,
-                    thresholds::AbstractVector,
-                    encoding::BinaryLabelEncoding)
+                    encoding::BinaryLabelEncoding,
+                    thresholds::AbstractVector)
     @_dimcheck length(targets) == length(outputs)
     curve = fill(BinaryConfusionMatrix{Int}(), length(thresholds))
-    @inbounds for i in 1:length(targets)
-        target = targets[i]
-        output = outputs[i]
+    @inbounds for I in eachindex(targets, outputs)
+        target = targets[I]
+        output = outputs[I]
         for (j, th) in enumerate(thresholds)
             pred = convertlabel(encoding, classify(output, th), LabelEnc.ZeroOne())
             curve[j] += BinaryConfusionMatrix{Int}(
@@ -159,7 +163,9 @@ end
 
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
-            :condition_positive, :condition_negative, :prevalence,
+            :condition_positive, :condition_negative,
+            :correctly_classified, :incorrectly_classified,
+            :prevalence,
             :predicted_condition_positive, :predicted_condition_negative,
             :true_positive_rate, :false_positive_rate,
             :true_negative_rate, :false_negative_rate,
@@ -210,7 +216,7 @@ end
 # --------------------------------------------------------------------
 
 auc(r::ROCCurve) = auc_from_rates(false_positive_rate(r), true_positive_rate(r))
-auc(args...) = auc(roc(args...))
+auc(args...; kw...) = auc(roc(args...; kw...))
 
 function auc_from_rates(fpr::AbstractVector{T}, tpr::AbstractVector{R}) where {T,R}
     O = promote_type(T,R)
@@ -227,23 +233,23 @@ end
 
 # --------------------------------------------------------------------
 
+@inline _thresholds(th::AbstractVector) = th
+@inline _thresholds(th::Number) = range(1, stop=0, length=th)
+
 function roc(targets::AbstractArray,
              outputs::AbstractArray,
-             thresholds::Number = 100,
-             encoding::BinaryLabelEncoding = labelenc(targets))
-    roc(targets, outputs, range(1,stop=0,length=thresholds), encoding)
+             labels::AbstractVector;
+             thresholds = 100)
+    encoding = LabelEnc.NativeLabels(labels)
+    nlabel(encoding) == 2 || error("Multiclass not yet implemented")
+    roc(targets, outputs, encoding; thresholds=thresholds)
 end
 
 function roc(targets::AbstractArray,
              outputs::AbstractArray,
-             encoding::BinaryLabelEncoding)
-    roc(targets, outputs, 100, encoding)
-end
-
-function roc(targets::AbstractArray,
-             outputs::AbstractArray,
-             thresholds::AbstractVector,
-             encoding::BinaryLabelEncoding = labelenc(targets))
-    curve = confusions(targets, outputs, thresholds, encoding)
-    ROCCurve(thresholds, curve)
+             encoding::BinaryLabelEncoding = labelenc(targets);
+             thresholds = 100)
+    th = _thresholds(thresholds)
+    curve = confusions(targets, outputs, encoding, th)
+    ROCCurve(th, curve)
 end
