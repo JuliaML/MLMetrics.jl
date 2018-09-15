@@ -17,13 +17,6 @@ Depth = 2
 
 ## Classification Metrics
 
-| predicted \ actual |     |     |
-|--------------------------------|-------------------------------------|-------------------------------------|
-|                                | `condition_positive`                | `condition_negative`                |
-| `predicted_condition_positive` | `true_positives`                    | `false_positives` (`type_1_errors`) |
-| `predicted_condition_negative` | `false_negatives` (`type_2_errors`) | `true_negatives`                    |
-
-`correctly_classified`, `incorrectly_classified`
 
 ## Regression Metrics
 

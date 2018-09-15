@@ -1,5 +1,10 @@
 using Documenter, MLMetrics
 
+# Workaround for JuliaLang/julia/pull/28625
+if Base.HOME_PROJECT[] !== nothing
+    Base.HOME_PROJECT[] = abspath(Base.HOME_PROJECT[])
+end
+
 makedocs(
     modules = [MLMetrics],
     clean = false,
@@ -14,6 +19,10 @@ makedocs(
     pages = Any[
         "Home" => "index.md",
         "gettingstarted.md",
+        hide("classification.md", Any[
+            joinpath.("counts", readdir(joinpath(@__DIR__, "src", "counts")))...,
+            joinpath.("fractions", readdir(joinpath(@__DIR__, "src", "fractions")))...,
+        ]),
         hide("Indices" => "indices.md"),
         "LICENSE.md",
     ],

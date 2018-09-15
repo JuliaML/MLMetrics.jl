@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MLLabelUtils = "66a33bbf-0c2b-5fc8-a008-9da813334f0a"
 MLMetrics = "42340ebd-fbc4-4eb3-a4ac-da1d58b4c100"
 
 [compat]

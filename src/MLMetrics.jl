@@ -30,14 +30,18 @@ export
     prevalence,
     positive_predictive_value, precision_score,
     negative_predictive_value,
-    false_discovery_rate,
-    false_omission_rate,
     true_positive_rate, sensitivity, recall,
     false_positive_rate,
     false_negative_rate,
     true_negative_rate, specificity,
+    false_discovery_rate,
+    false_omission_rate,
     accuracy,
     f_score, f1_score,
+    positive_likelihood_ratio,
+    negative_likelihood_ratio,
+    diagnostic_odds_ratio,
+    matthews_corrcoef,
 
     # roc
     confusions,
@@ -72,11 +76,7 @@ export
     total_variance_score,
     explained_variance_score,
     unexplained_variance_score,
-    r2_score,
-    positive_likelihood_ratio,
-    negative_likelihood_ratio,
-    diagnostic_odds_ratio,
-    matthews_corrcoef
+    r2_score
 
 include("classification/averagemode.jl")
 include("classification/upstream.jl")
