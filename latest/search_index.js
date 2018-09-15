@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Classification Metrics",
     "category": "section",
-    "text": ""
+    "text": "predicted \\ actual  \n condition_positive condition_negative\npredicted_condition_positive true_positives false_positives (type_1_errors)\npredicted_condition_negative false_negatives (type_2_errors) true_negativescorrectly_classified, incorrectly_classified"
 },
 
 {
