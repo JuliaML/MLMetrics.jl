@@ -76,7 +76,7 @@ julia> precision_score([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
 0.5555555555555555
 ```
 """ ->
-positive_predictive_value := true_positives / predicted_condition_positive
+positive_predictive_value := true_positives / predicted_positive
 
 const precision_score = positive_predictive_value
 
@@ -117,7 +117,7 @@ julia> negative_predictive_value([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:ma
 0.8333333333333334
 ```
 """ ->
-negative_predictive_value := true_negatives / predicted_condition_negative
+negative_predictive_value := true_negatives / predicted_negative
 
 # --------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ julia> false_discovery_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
 0.4444444444444444
 ```
 """ ->
-false_discovery_rate := false_positives / predicted_condition_positive
+false_discovery_rate := false_positives / predicted_positive
 
 # --------------------------------------------------------------------
 
@@ -197,7 +197,7 @@ julia> false_omission_rate([:a,:b,:a,:c,:c], [:a,:c,:b,:c,:c], avgmode=:macro)
 0.16666666666666666
 ```
 """ ->
-false_omission_rate := false_negatives / predicted_condition_negative
+false_omission_rate := false_negatives / predicted_negative
 
 # --------------------------------------------------------------------
 

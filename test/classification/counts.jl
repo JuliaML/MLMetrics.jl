@@ -14,8 +14,8 @@ const fun_refs_scalar = [
     (false_negatives, (0,0,1,0)),
     (condition_positive, (0,0,1,1)),
     (condition_negative, (1,1,0,0)),
-    (predicted_condition_positive, (0,1,0,1)),
-    (predicted_condition_negative, (1,0,1,0)),
+    (predicted_positive, (0,1,0,1)),
+    (predicted_negative, (1,0,1,0)),
     (correctly_classified,   (1,0,0,1)),
     (incorrectly_classified, (0,1,1,0)),
 ]
@@ -211,8 +211,8 @@ const fun_refs_arrays = [
     (false_negatives, 5),
     (condition_positive, 10),
     (condition_negative, 7),
-    (predicted_condition_positive, 8),
-    (predicted_condition_negative, 9),
+    (predicted_positive, 8),
+    (predicted_negative, 9),
     (correctly_classified, 9),
     (incorrectly_classified, 8),
 ]

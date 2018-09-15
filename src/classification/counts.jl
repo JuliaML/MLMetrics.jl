@@ -71,23 +71,23 @@ condition_negative(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    predicted_condition_positive(target, output, [encoding]) -> Int
+    predicted_positive(target, output, [encoding]) -> Int
 
 Return `1` if `output` is considered a positive label according
 to `encoding`. Return `0` otherwise.
 """
-predicted_condition_positive(target, output, encoding::BinaryLabelEncoding) =
+predicted_positive(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(output, encoding))
 
 # --------------------------------------------------------------------
 
 """
-    predicted_condition_negative(target, output, [encoding]) -> Int
+    predicted_negative(target, output, [encoding]) -> Int
 
 Return `1` if `output` is considered a negative label according
 to `encoding`. Return `0` otherwise.
 """
-predicted_condition_negative(target, output, encoding::BinaryLabelEncoding) =
+predicted_negative(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(output, encoding))
 
 # --------------------------------------------------------------------
@@ -125,7 +125,7 @@ _length_targets(target::AbstractArray, output, encoding) = length(targets)
 for fun in (:true_positives,  :true_negatives,
             :false_positives, :false_negatives,
             :condition_positive, :condition_negative,
-            :predicted_condition_positive, :predicted_condition_negative,
+            :predicted_positive, :predicted_negative,
             :correctly_classified, :incorrectly_classified)
     fun_name = string(fun)
     fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)" => s"\1 \2"))

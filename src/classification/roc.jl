@@ -40,9 +40,9 @@ condition_negative(c::BinaryConfusionMatrix) =
     true_negatives(c) + false_positives(c)
 LearnBase.nobs(c::BinaryConfusionMatrix) =
     condition_positive(c) + condition_negative(c)
-predicted_condition_positive(c::BinaryConfusionMatrix) =
+predicted_positive(c::BinaryConfusionMatrix) =
     true_positives(c) + false_positives(c)
-predicted_condition_negative(c::BinaryConfusionMatrix) =
+predicted_negative(c::BinaryConfusionMatrix) =
     true_negatives(c) + false_negatives(c)
 correctly_classified(c::BinaryConfusionMatrix) =
     true_positives(c) + true_negatives(c)
@@ -166,7 +166,7 @@ for fun in (:true_positives,  :true_negatives,
             :condition_positive, :condition_negative,
             :correctly_classified, :incorrectly_classified,
             :prevalence,
-            :predicted_condition_positive, :predicted_condition_negative,
+            :predicted_positive, :predicted_negative,
             :true_positive_rate, :false_positive_rate,
             :true_negative_rate, :false_negative_rate,
             :positive_predictive_value, :negative_predictive_value,

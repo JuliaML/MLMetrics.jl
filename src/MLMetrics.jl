@@ -21,8 +21,8 @@ export
     false_negatives, type_2_errors,
     condition_positive,
     condition_negative,
-    predicted_condition_positive,
-    predicted_condition_negative,
+    predicted_positive,
+    predicted_negative,
     correctly_classified,
     incorrectly_classified, misclassified,
 

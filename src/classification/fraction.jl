@@ -23,7 +23,7 @@ This will allow for readable function definition such as
     @reduce_fraction \"\"\"
     some documentation for the function
     \"\"\" ->
-    precision := true_positives / predicted_condition_positive
+    precision := true_positives / predicted_positive
 
 with the added bonus of the functions being implemented in such
 a way as to avoid memory allocation and being able to compute
