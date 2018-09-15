@@ -4,7 +4,7 @@ _Utility package for scoring models in data science and machine learning. This t
 
 | **Package Status** | **Package Evaluator** | **Build Status**  |
 |:------------------:|:---------------------:|:-----------------:|
-| [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip) [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) | [![MLMetrics](http://pkg.julialang.org/badges/MLMetrics_0.7.svg)](http://pkg.julialang.org/?pkg=MLMetrics&ver=0.7) | [![Build Status](https://travis-ci.org/JuliaML/MLMetrics.jl.svg?branch=master)](https://travis-ci.org/JuliaML/MLMetrics.jl) [![Build status](https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj?svg=true)](https://ci.appveyor.com/project/JuliaML/mlmetrics-jl) [![Coverage Status](https://coveralls.io/repos/JuliaML/MLMetrics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaML/MLMetrics.jl?branch=master) |
+| [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaML.github.io/MLMetrics.jl/latest) | [![MLMetrics](http://pkg.julialang.org/badges/MLMetrics_0.7.svg)](http://pkg.julialang.org/?pkg=MLMetrics&ver=0.7) | [![Build Status](https://travis-ci.org/JuliaML/MLMetrics.jl.svg?branch=master)](https://travis-ci.org/JuliaML/MLMetrics.jl) [![Build status](https://ci.appveyor.com/api/projects/status/1p7noblkootdqiqj?svg=true)](https://ci.appveyor.com/project/JuliaML/mlmetrics-jl) [![Coverage Status](https://coveralls.io/repos/JuliaML/MLMetrics.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaML/MLMetrics.jl?branch=master) |
 
 ## Introduction
 
@@ -18,7 +18,8 @@ accuracy([1, 1, 1, 0], [1, 0, 1, 1])
 ## Documentation
 
 For a much more detailed treatment check out the
-[latest documentation](#)
+[latest
+documentation](https://JuliaML.github.io/MLMetrics.jl/stable)
 
 Additionally, you can make use of Julia's native docsystem. The
 following example shows how to get additional information on
