@@ -22,6 +22,9 @@
 
 Name | Synonyms | Description
 -----|:--------:|:--------------
+[`accuracy`](@ref) | - | Fraction of correctly classified observations.
+[`f_score`](@ref) | - | Accuracy measure that considers recall and precision.
+[`f1_score`](@ref) | - | Harmonic mean of recall and precision.
 [`prevalence`](@ref) | - | Fraction of truly positive outcomes in the data.
 [`positive_predictive_value`](@ref) | `precision_score` | Fraction of positive predicted outcomes that are true positives.
 [`negative_predictive_value`](@ref) | - | Fraction of negative predicted outcomes that are true negatives.
@@ -31,9 +34,6 @@ Name | Synonyms | Description
 [`false_negative_rate`](@ref) | - | Fraction of truly positive outcomes that are (wrongly) predicted as negative (i.e. false negatives).
 [`false_discovery_rate`](@ref) | - | Fraction of positive predicted outcomes that are false positives.
 [`false_omission_rate`](@ref) | - | Fraction of negative predicted outcomes that are false negatives.
-[`accuracy`](@ref) | - | Fraction of correctly classified observations.
-[`f_score`](@ref) | - | Accuracy measure that considers recall and precision.
-[`f1_score`](@ref) | - | Harmonic mean of recall and precision.
 [`positive_likelihood_ratio`](@ref) | - | Fraction of true positive rate by false positive rate.
 [`negative_likelihood_ratio`](@ref) | - | Fraction of false negative rate by true negative rate.
 [`diagnostic_odds_ratio`](@ref) | - | Fraction of positive likelihood ratio by negative likelihood ratio.

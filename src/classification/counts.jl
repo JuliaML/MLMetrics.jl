@@ -6,7 +6,7 @@ marked as positive outcomes in `targets`. Which value denotes
 "positive" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -47,7 +47,7 @@ marked as negative outcomes in `targets`. Which value(s) denote
 "negative" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -89,7 +89,7 @@ occurrences are also known as `type_1_errors`. Which value
 denotes "positive" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -133,7 +133,7 @@ occurrences are also known as `type_2_errors`. Which value
 denotes "positive" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -175,7 +175,7 @@ Count the number of positive outcomes in `targets`. Which value
 denotes "positive" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -215,7 +215,7 @@ Count the number of negative outcomes in `targets`. Which values
 denote "negative" depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -255,7 +255,7 @@ Which value denotes "positive" depends on the given (or inferred)
 `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -295,7 +295,7 @@ Which values denote "negative" depends on the given (or inferred)
 `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -336,7 +336,7 @@ interpretation. Which value(s) denote "positive" or "negative"
 depends on the given (or inferred) `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 
@@ -378,7 +378,7 @@ under a two-class interpretation. Which value(s) denote
 `encoding`.
 $SCALAR_DESC
 
-$ENCODING_DESCR
+$COUNT_ENCODING_DESCR
 
 # Arguments
 

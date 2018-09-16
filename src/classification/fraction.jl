@@ -64,7 +64,7 @@ macro reduce_fraction(all)
 
         # add documentation to function
         @doc """
-            $($(string(fun)))(targets, outputs, [encoding], [avgmode])
+            $($(string(fun)))(targets, outputs, [encoding], [avgmode = :none]) -> Union{Float64, Dict}
 
         $($docstr)
         """ ($fun)
@@ -192,7 +192,7 @@ macro map_fraction(all)
 
         # add documentation to function
         @doc """
-            $($(string(fun)))(targets, outputs, [encoding], [avgmode])
+            $($(string(fun)))(targets, outputs, [encoding], [avgmode = :none]) -> Union{Float64, Dict}
 
         $($docstr)
         """ ($fun)
