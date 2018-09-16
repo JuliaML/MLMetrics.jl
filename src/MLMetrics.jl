@@ -80,7 +80,7 @@ export
 
 include("classification/averagemode.jl")
 include("classification/upstream.jl")
-include("classification/misc.jl")
+include("classification/docstring_const.jl")
 include("classification/counts.jl")
 include("classification/fraction.jl")
 include("classification/metrics.jl")

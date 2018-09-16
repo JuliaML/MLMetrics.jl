@@ -1,8 +1,38 @@
 """
-    true_positives(target, output, [encoding]) -> Int
+    true_positives(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if both, `target` and `output`, are considered
-positive labels according to `encoding`. Return `0` otherwise.
+Count how many positive predicted outcomes in `outputs` are also
+marked as positive outcomes in `targets`. Which value denotes
+"positive" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_positive`](@ref),
+[`condition_positive`](@ref),
+[`true_positive_rate`](@ref)
+
+# Examples
+
+```jldoctest
+julia> true_positives(1, 1, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> true_positives([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+2
+
+julia> true_positives([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 1
+  :b => 2
+  :c => 0
+```
 """
 true_positives(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(target, encoding) & isposlabel(output, encoding))
@@ -10,10 +40,40 @@ true_positives(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    true_negatives(target, output, [encoding]) -> Int
+    true_negatives(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if both, `target` and `output`, are considered
-negative labels according to `encoding`. Return `0` otherwise.
+Count how many negative predicted outcomes in `outputs` are also
+marked as negative outcomes in `targets`. Which value(s) denote
+"negative" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_negative`](@ref),
+[`condition_negative`](@ref),
+[`true_negative_rate`](@ref)
+
+# Examples
+
+```jldoctest
+julia> true_negatives(0, 0, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> true_negatives([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+1
+
+julia> true_negatives([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 2
+  :b => 3
+  :c => 4
+```
 """
 true_negatives(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(target, encoding) & isneglabel(output, encoding))
@@ -21,11 +81,41 @@ true_negatives(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    false_positives(target, output, [encoding]) -> Int
+    false_positives(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `target` is considered a negative label and
-`output` is considered a positive label (according to `encoding`).
-Return `0` otherwise. This is also known as type 1 error.
+Count how many positive predicted outcomes in `outputs` are
+actually marked as negative outcomes in `targets`. These
+occurrences are also known as `type_1_errors`. Which value
+denotes "positive" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_positive`](@ref),
+[`condition_negative`](@ref),
+[`false_positive_rate`](@ref)
+
+# Examples
+
+```jldoctest
+julia> false_positives(0, 1, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> false_positives([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+1
+
+julia> false_positives([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 2
+  :b => 1
+  :c => 0
+```
 """
 false_positives(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(target, encoding) & isposlabel(output, encoding))
@@ -35,11 +125,41 @@ const type_1_errors = false_positives
 # --------------------------------------------------------------------
 
 """
-    false_negatives(target, output, [encoding]) -> Int
+    false_negatives(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `target` is considered a positive label and
-`output` is considered a negative label (according to `encoding`).
-Return `0` otherwise.
+Count how many negative predicted outcomes in `outputs` are
+actually marked as positive outcomes in `targets`. These
+occurrences are also known as `type_2_errors`. Which value
+denotes "positive" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_negative`](@ref),
+[`condition_positive`](@ref),
+[`false_negative_rate`](@ref)
+
+# Examples
+
+```jldoctest
+julia> false_negatives(1, 0, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> false_negatives([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+1
+
+julia> false_negatives([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 1
+  :b => 0
+  :c => 2
+```
 """
 false_negatives(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(target, encoding) & isneglabel(output, encoding))
@@ -49,10 +169,39 @@ const type_2_errors = false_negatives
 # --------------------------------------------------------------------
 
 """
-    condition_positive(target, output, [encoding]) -> Int
+    condition_positive(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `target` is considered a positive label according
-to `encoding`. Return `0` otherwise.
+Count the number of positive outcomes in `targets`. Which value
+denotes "positive" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_positive`](@ref),
+[`condition_negative`](@ref),
+[`prevalence`](@ref)
+
+# Examples
+
+```jldoctest
+julia> condition_positive(1, 0, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> condition_positive([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+3
+
+julia> condition_positive([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 2
+  :b => 2
+  :c => 2
+```
 """
 condition_positive(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(target, encoding))
@@ -60,10 +209,38 @@ condition_positive(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    condition_negative(target, output, [encoding]) -> Int
+    condition_negative(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `target` is considered a negative label according
-to `encoding`. Return `0` otherwise.
+Count the number of negative outcomes in `targets`. Which values
+denote "negative" depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_negative`](@ref),
+[`condition_positive`](@ref)
+
+# Examples
+
+```jldoctest
+julia> condition_negative(0, 1, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> condition_negative([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+2
+
+julia> condition_negative([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 4
+  :b => 4
+  :c => 4
+```
 """
 condition_negative(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(target, encoding))
@@ -71,10 +248,39 @@ condition_negative(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    predicted_positive(target, output, [encoding]) -> Int
+    predicted_positive(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `output` is considered a positive label according
-to `encoding`. Return `0` otherwise.
+Count the number of positive predicted outcomes in `outputs`.
+Which value denotes "positive" depends on the given (or inferred)
+`encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_negative`](@ref),
+[`condition_positive`](@ref)
+
+# Examples
+
+```jldoctest
+julia> predicted_positive(0, 1, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> predicted_positive([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+3
+
+julia> predicted_positive([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 3
+  :b => 3
+  :c => 0
+```
 """
 predicted_positive(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(output, encoding))
@@ -82,10 +288,39 @@ predicted_positive(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    predicted_negative(target, output, [encoding]) -> Int
+    predicted_negative(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `output` is considered a negative label according
-to `encoding`. Return `0` otherwise.
+Count the number of negative predicted outcomes in `outputs`.
+Which values denote "negative" depends on the given (or inferred)
+`encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`predicted_positive`](@ref),
+[`condition_negative`](@ref)
+
+# Examples
+
+```jldoctest
+julia> predicted_negative(1, 0, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> predicted_negative([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+2
+
+julia> predicted_negative([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 3
+  :b => 3
+  :c => 6
+```
 """
 predicted_negative(target, output, encoding::BinaryLabelEncoding) =
     Int(isneglabel(output, encoding))
@@ -93,10 +328,40 @@ predicted_negative(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    correctly_classified(target, output, [encoding]) -> Int
+    correctly_classified(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `output` is considered equal to `target`
-(according to `encoding`). Return `0` otherwise.
+Count the number of predicted outcomes in `outputs` that agree
+with the expected outcomes in `targets` under a two-class
+interpretation. Which value(s) denote "positive" or "negative"
+depends on the given (or inferred) `encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`incorrectly_classified`](@ref),
+[`accuracy`](@ref)
+
+# Examples
+
+```jldoctest
+julia> correctly_classified(0, 0, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> correctly_classified([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+3
+
+julia> correctly_classified([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 3
+  :b => 5
+  :c => 4
+```
 """
 correctly_classified(target, output, encoding::BinaryLabelEncoding) =
     Int(isposlabel(target, encoding) == isposlabel(output, encoding))
@@ -104,10 +369,41 @@ correctly_classified(target, output, encoding::BinaryLabelEncoding) =
 # --------------------------------------------------------------------
 
 """
-    incorrectly_classified(target, output, [encoding]) -> Int
+    incorrectly_classified(targets, outputs, [encoding]) -> Union{Int, Dict}
 
-Return `1` if `output` is considered different from `target`
-(according to `encoding`). Return `0` otherwise.
+Count the number of predicted outcomes in `outputs` that are
+misclassified according to the expected outcomes in `targets`
+under a two-class interpretation. Which value(s) denote
+"positive" or "negative" depends on the given (or inferred)
+`encoding`.
+$SCALAR_DESC
+
+$ENCODING_DESCR
+
+# Arguments
+
+$COUNT_ARGS
+
+# See also
+
+[`correctly_classified`](@ref),
+[`accuracy`](@ref)
+
+# Examples
+
+```jldoctest
+julia> incorrectly_classified(0, 1, LabelEnc.ZeroOne()) # single observation
+1
+
+julia> incorrectly_classified([1,0,1,1,0], [1,1,1,0,0]) # multiple observations
+2
+
+julia> incorrectly_classified([:a,:a,:b,:b,:c,:c], [:a,:b,:b,:b,:a,:a]) # multi-class
+Dict{Symbol,$Int} with 3 entries:
+  :a => 3
+  :b => 1
+  :c => 2
+```
 """
 incorrectly_classified(target, output, encoding::BinaryLabelEncoding) =
     Int(xor(isposlabel(target, encoding), isposlabel(output, encoding)))
@@ -127,8 +423,6 @@ for fun in (:true_positives,  :true_negatives,
             :condition_positive, :condition_negative,
             :predicted_positive, :predicted_negative,
             :correctly_classified, :incorrectly_classified)
-    fun_name = string(fun)
-    fun_desc = rstrip(replace(string(fun), r"([a-z]+)_?([a-z]*)" => s"\1 \2"))
 
     # Convenience syntax for using native labels
     @eval function ($fun)(targets, outputs, encoding::AbstractVector)
@@ -165,18 +459,7 @@ for fun in (:true_positives,  :true_negatives,
     end
 
     # Multiclass LabelEncoding: Generate shared accumulator
-    @eval @doc """
-        $($fun_name)(targets::AbstractArray, outputs::AbstractArray, [encoding]) -> Union{Int, Dict}
-
-    Count the total number of **$($fun_desc)** in `outputs` by
-    comparing each element against the corresponding value in
-    `targets` (according to `encoding`). Both parameters are
-    expected to be vectors of some form, which means they are
-    allowed to be row-vectors (or row-matrices).
-
-    $ENCODING_DESCR
-    """
-    function ($fun)(
+    @eval function ($fun)(
             targets::AbstractArray,
             outputs::AbstractArray,
             encoding::LabelEncoding)
