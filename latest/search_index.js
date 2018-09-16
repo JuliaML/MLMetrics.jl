@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Classification Metrics",
     "title": "Counts",
     "category": "section",
-    "text": "predicted \\ actual  \n condition_positive condition_negative\npredicted_positive true_positives false_positives (type_1_errors)\npredicted_negative false_negatives (type_2_errors) true_negativescorrectly_classified vs incorrectly_classified"
+    "text": "<div class=\"confusion\">-  actual \n  condition_positive condition_negative\npredicted predicted_positive true_positives false_positives (type_1_errors)\n predicted_negative false_negatives (type_2_errors) true_negatives</div>correctly_classified vs incorrectly_classified"
 },
 
 {
