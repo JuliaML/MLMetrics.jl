@@ -2,11 +2,19 @@
 
 ## Counts
 
-| predicted \ actual | | |
-|:----------------------------:|:-------------------------------------------:|:-------------------------------------------:|
-|                              | [`condition_positive`](@ref)                | [`condition_negative`](@ref)                |
-| [`predicted_positive`](@ref) | [`true_positives`](@ref)                    | [`false_positives`](@ref) (`type_1_errors`) |
-| [`predicted_negative`](@ref) | [`false_negatives`](@ref) (`type_2_errors`) | [`true_negatives`](@ref)                    |
+```@raw html
+<div class="confusion">
+```
+
+|         -       |                              | actual | |
+|-----------------|:----------------------------:|:-------------------------------------------:|:-------------------------------------------:|
+|                 |                              | [`condition_positive`](@ref)                | [`condition_negative`](@ref)                |
+| **predicted**   | [`predicted_positive`](@ref) | [`true_positives`](@ref)                    | [`false_positives`](@ref) (`type_1_errors`) |
+|                 | [`predicted_negative`](@ref) | [`false_negatives`](@ref) (`type_2_errors`) | [`true_negatives`](@ref)                    |
+
+```@raw html
+</div>
+```
 
 [`correctly_classified`](@ref) vs [`incorrectly_classified`](@ref)
 

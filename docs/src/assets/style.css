@@ -10,6 +10,30 @@ article hr {
     border-top-width: 1px;
 }
 */
+.confusion table {
+    text-align: center;
+}
+.confusion table th {
+    border-bottom-width: 1px;
+}
+.confusion table tr:nth-child(2n) {
+    background-color: white;
+}
+.confusion table tr:nth-child(1) th {
+    border-style: none;
+}
+.confusion table tr:nth-child(1) th:nth-child(1) {
+    color: white;
+}
+.confusion table tr td:nth-child(1) {
+    border-style: none;
+}
+.confusion table tr:nth-child(2) td:nth-child(2) {
+    border-style: none;
+}
+.confusion table tr:nth-child(2) td:nth-child(3), .confusion table tr:nth-child(2) td:nth-child(4), .confusion table tr:nth-child(3) td:nth-child(2), .confusion table tr:nth-child(4) td:nth-child(2) {
+    background-color: #f3f6f6;
+}
 article section.docstring {
     margin: 0;
     border: 0;
