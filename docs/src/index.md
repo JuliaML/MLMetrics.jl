@@ -1,5 +1,10 @@
 # MLMetrics.jl's Documentation
 
+This package represents a community effort to provide a wide
+range of common performance metrics for evaluating learning
+algorithms and prediction models. As such it is part of the
+[JuliaML](https://github.com/JuliaML) ecosystem.
+
 ## Where to begin?
 
 If this is the first time you consider using MLMetrics for
