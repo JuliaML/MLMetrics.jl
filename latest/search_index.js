@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "MLMetrics.jl\'s Documentation",
     "category": "section",
-    "text": ""
+    "text": "This package represents a community effort to provide a wide range of common performance metrics for evaluating learning algorithms and prediction models. As such it is part of the JuliaML ecosystem."
 },
 
 {

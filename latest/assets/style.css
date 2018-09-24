@@ -10,6 +10,10 @@ article hr {
     border-top-width: 1px;
 }
 */
+th, td {
+    line-height: 1.0;
+    padding: 0.5em 0.5em;
+}
 .confusion table {
     text-align: center;
 }
