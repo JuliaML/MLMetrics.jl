@@ -19,7 +19,7 @@ accuracy([1, 1, 1, 0], [1, 0, 1, 1])
 
 For a much more detailed treatment check out the
 [latest
-documentation](https://JuliaML.github.io/MLMetrics.jl/stable)
+documentation](https://JuliaML.github.io/MLMetrics.jl/latest)
 
 Additionally, you can make use of Julia's native docsystem. The
 following example shows how to get additional information on
