@@ -1,3 +1,7 @@
+# DEPRECATED
+
+This package is deprecated.
+
 # MLMetrics.jl
 
 _Utility package for scoring models in data science and machine learning. This toolset is written in Julia for blazing fast performance._
